@@ -1,0 +1,25 @@
+name: lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+jobs:
+  lint:
+    strategy:
+      matrix:
+        go-version: [1.20.x]
+        os: [ubuntu-latest]
+    name: lint
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
+        with:
+          go-version: ${{ matrix.go-version }}
+      - run: make lint
