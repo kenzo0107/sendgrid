@@ -135,6 +135,47 @@ func TestGetTeammate_Failed(t *testing.T) {
 	}
 }
 
+func TestGetUsernameByEmail(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/teammates", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONTeammates); err != nil {
+			t.Fatal(err)
+		}
+	})
+	mux.HandleFunc("/teammates/username", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, testJSONTeammate); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetUsernameByEmail(context.TODO(), "kenzo.tanaka@example.com")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := "kenzo.tanaka"
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetUsernameByEmail_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/teammates", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetUsernameByEmail(context.TODO(), "kenzo.tanaka@example.com")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestGetTeammates(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()

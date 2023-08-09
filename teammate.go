@@ -45,6 +45,21 @@ func (c *Client) GetTeammate(ctx context.Context, username string) (*User, error
 	return user, nil
 }
 
+func (c *Client) GetUsernameByEmail(ctx context.Context, email string) (username string, err error) {
+	users, err := c.GetTeammates(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	for _, user := range users {
+		if user.Email != email {
+			continue
+		}
+		username = user.Username
+	}
+	return username, nil
+}
+
 func (c *Client) GetTeammates(ctx context.Context) ([]*User, error) {
 	req, err := c.NewRequest("GET", "/teammates", nil)
 	if err != nil {
