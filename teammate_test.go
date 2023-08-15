@@ -11,100 +11,28 @@ import (
 	"github.com/pkg/errors"
 )
 
-var testJSONTeammate = `{
-	"username": "kenzo.tanaka",
-	"email": "kenzo.tanaka@example.com",
-	"first_name": "Kenzo",
-	"last_name": "Tanaka",
-	"address": "",
-	"address2": "",
-	"city": "",
-	"state": "",
-	"zip": "",
-	"country": "",
-	"company": "",
-	"website": "",
-	"phone": "",
-	"is_admin": false,
-	"is_sso": false,
-	"user_type": "teammate",
-	"scopes": [],
-	"is_read_only": false
-  }`
-
-var testJSONTeammates = fmt.Sprintf(`{"result":[%s]}`, testJSONTeammate)
-
-func getTestUser() *User {
-	return &User{
-		Username:   "kenzo.tanaka",
-		Email:      "kenzo.tanaka@example.com",
-		FirstName:  "Kenzo",
-		LastName:   "Tanaka",
-		Address:    "",
-		Address2:   "",
-		City:       "",
-		State:      "",
-		Zip:        "",
-		Country:    "",
-		Company:    "",
-		Website:    "",
-		Phone:      "",
-		IsAdmin:    false,
-		IsSSO:      false,
-		UserType:   "teammate",
-		Scopes:     []string{},
-		IsReadOnly: false,
-	}
-}
-
-var testJSONPendingTeammates = `{"result":[{
-	"email": "kenzo.tanaka@example.com",
-	"scopes": [],
-	"is_admin": false,
-	"token": "abcdefghi",
-	"expiration_date": 1691502820
-  }]}`
-
-func getTestPendingTeammates() []*User {
-	return []*User{
-		{
-			Email:          "kenzo.tanaka@example.com",
-			Scopes:         []string{},
-			IsAdmin:        false,
-			Token:          "abcdefghi",
-			ExpirationDate: 1691502820,
-		},
-	}
-}
-
-var testJSONInviteTeammate = `{
-	"email": "kenzo.tanaka@example.com",
-	"scopes":[
-		"user.profile.read",
-		"user.profile.update"
-	],
-	"is_admin": false,
-	"token": "abcdefghi"
-  }`
-
-func getTestInviteTeammate() *User {
-	return &User{
-		Email: "kenzo.tanaka@example.com",
-		Scopes: []string{
-			"user.profile.read",
-			"user.profile.update",
-		},
-		IsAdmin: false,
-		Token:   "abcdefghi",
-	}
-}
-
 func TestGetTeammate(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
 	mux.HandleFunc("/teammates/username", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONTeammate); err != nil {
+		if _, err := fmt.Fprint(w, `{
+			"username": "dummy",
+			"email": "dummy@example.com",
+			"first_name": "Kenzo",
+			"last_name": "Tanaka",
+			"address": "",
+			"address2": "",
+			"city": "",
+			"state": "",
+			"zip": "",
+			"country": "",
+			"website": "",
+			"phone": "",
+			"is_admin": false,
+			"user_type": "teammate",
+			"scopes": []
+		  }`); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -115,7 +43,23 @@ func TestGetTeammate(t *testing.T) {
 		return
 	}
 
-	want := getTestUser()
+	want := &OutputGetTeammate{
+		Username:  "dummy",
+		Email:     "dummy@example.com",
+		FirstName: "Kenzo",
+		LastName:  "Tanaka",
+		Address:   "",
+		Address2:  "",
+		City:      "",
+		State:     "",
+		Zip:       "",
+		Country:   "",
+		Website:   "",
+		Phone:     "",
+		IsAdmin:   false,
+		UserType:  "teammate",
+		Scopes:    []string{},
+	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse)
 	}
@@ -140,7 +84,23 @@ func TestGetTeammates(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/teammates", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONTeammates); err != nil {
+		if _, err := fmt.Fprint(w, `{"result":[{
+			"username": "dummy",
+			"email": "dummy@example.com",
+			"first_name": "Kenzo",
+			"last_name": "Tanaka",
+			"address": "",
+			"address2": "",
+			"city": "",
+			"state": "",
+			"zip": "",
+			"country": "",
+			"website": "",
+			"phone": "",
+			"is_admin": false,
+			"user_type": "teammate",
+			"scopes": []
+		  }]}`); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -151,7 +111,26 @@ func TestGetTeammates(t *testing.T) {
 		return
 	}
 
-	want := []*User{getTestUser()}
+	want := &OutputGetTeammates{
+		Teammates: []Teammate{
+			{
+				Username:  "dummy",
+				Email:     "dummy@example.com",
+				FirstName: "Kenzo",
+				LastName:  "Tanaka",
+				Address:   "",
+				Address2:  "",
+				City:      "",
+				State:     "",
+				Zip:       "",
+				Country:   "",
+				Website:   "",
+				Phone:     "",
+				IsAdmin:   false,
+				UserType:  "teammate",
+			},
+		},
+	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse)
 	}
@@ -176,7 +155,13 @@ func TestGetPendingTeammates(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/teammates/pending", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONPendingTeammates); err != nil {
+		if _, err := fmt.Fprint(w, `{"result":[{
+			"email": "dummy@example.com",
+			"scopes": [],
+			"is_admin": false,
+			"token": "abcdefghi",
+			"expiration_date": 1691502820
+		  }]}`); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -187,7 +172,17 @@ func TestGetPendingTeammates(t *testing.T) {
 		return
 	}
 
-	want := getTestPendingTeammates()
+	want := &OutputGetPendingTeammates{
+		PendingTeammates: []PendingTeammate{
+			{
+				Email:          "dummy@example.com",
+				Scopes:         []string{},
+				IsAdmin:        false,
+				Token:          "abcdefghi",
+				ExpirationDate: 1691502820,
+			},
+		},
+	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse)
 	}
@@ -212,13 +207,21 @@ func TestInviteTeammate(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/teammates", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONInviteTeammate); err != nil {
+		if _, err := fmt.Fprint(w, `{
+			"email": "dummy@example.com",
+			"scopes":[
+				"user.profile.read",
+				"user.profile.update"
+			],
+			"is_admin": false,
+			"token": "abcdefghi"
+		  }`); err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	expected, err := client.InviteTeammate(context.TODO(), &InputInviteTeammate{
-		Email:   "kenzo.tanaka@example.com",
+		Email:   "dummy@example.com",
 		IsAdmin: false,
 		Scopes: []string{
 			"user.profile.read",
@@ -230,7 +233,15 @@ func TestInviteTeammate(t *testing.T) {
 		return
 	}
 
-	want := getTestInviteTeammate()
+	want := &OutputInviteTeammate{
+		Token:   "abcdefghi",
+		Email:   "dummy@example.com",
+		IsAdmin: false,
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	}
 
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
@@ -246,7 +257,7 @@ func TestInviteTeammate_Failed(t *testing.T) {
 	})
 
 	_, err := client.InviteTeammate(context.TODO(), &InputInviteTeammate{
-		Email:   "kenzo.tanaka@example.com",
+		Email:   "dummy@example.com",
 		IsAdmin: false,
 		Scopes: []string{
 			"user.profile.read",
@@ -262,13 +273,32 @@ func TestUpdateTeammatePermissions(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONTeammate); err != nil {
+	mux.HandleFunc("/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"username": "dummy",
+			"first_name": "Kenzo",
+			"last_name": "Tanaka",
+			"email": "dummy@example.com",
+			"scopes": [
+				"user.profile.read",
+				"user.profile.update"
+			],
+			"address":  "",
+			"address2": "",
+			"city":     "",
+			"state":    "",
+			"zip":      "",
+			"country":  "",
+			"website":  "",
+			"phone":    "",
+			"is_admin":  false,
+			"user_type": "teammate"
+		}`); err != nil {
 			t.Fatal(err)
 		}
 	})
 
-	expected, err := client.UpdateTeammatePermissions(context.TODO(), "kenzo.tanaka", &InputUpdateTeammatePermissions{
+	expected, err := client.UpdateTeammatePermissions(context.TODO(), "dummy", &InputUpdateTeammatePermissions{
 		IsAdmin: false,
 		Scopes: []string{
 			"user.profile.read",
@@ -280,7 +310,26 @@ func TestUpdateTeammatePermissions(t *testing.T) {
 		return
 	}
 
-	want := getTestUser()
+	want := &OutputUpdateTeammatePermissions{
+		Username:  "dummy",
+		FirstName: "Kenzo",
+		LastName:  "Tanaka",
+		Email:     "dummy@example.com",
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+		Address:  "",
+		Address2: "",
+		City:     "",
+		State:    "",
+		Zip:      "",
+		Country:  "",
+		Website:  "",
+		Phone:    "",
+		IsAdmin:  false,
+		UserType: "teammate",
+	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
 	}
@@ -290,11 +339,11 @@ func TestUpdateTeammatePermissions_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.UpdateTeammatePermissions(context.TODO(), "kenzo.tanaka", &InputUpdateTeammatePermissions{
+	_, err := client.UpdateTeammatePermissions(context.TODO(), "dummy", &InputUpdateTeammatePermissions{
 		IsAdmin: false,
 		Scopes: []string{
 			"user.profile.read",
@@ -309,13 +358,11 @@ func TestDeleteTeammate(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONTeammate); err != nil {
-			t.Fatal(err)
-		}
+	mux.HandleFunc("/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
 	})
 
-	err := client.DeleteTeammate(context.TODO(), "kenzo.tanaka")
+	err := client.DeleteTeammate(context.TODO(), "dummy")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 		return
@@ -326,11 +373,11 @@ func TestDeleteTeammate_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	err := client.DeleteTeammate(context.TODO(), "kenzo.tanaka")
+	err := client.DeleteTeammate(context.TODO(), "dummy")
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
@@ -340,13 +387,11 @@ func TestDeletePendingTeammate(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/pending/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
-		if _, err := fmt.Fprint(w, testJSONTeammate); err != nil {
-			t.Fatal(err)
-		}
+	mux.HandleFunc("/teammates/pending/dummy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
 	})
 
-	err := client.DeletePendingTeammate(context.TODO(), "kenzo.tanaka")
+	err := client.DeletePendingTeammate(context.TODO(), "dummy")
 	if err != nil {
 		t.Errorf("Unexpected error: %v", err)
 		return
@@ -357,11 +402,11 @@ func TestDeletePendingTeammate_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
-	mux.HandleFunc("/teammates/pending/kenzo.tanaka", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/teammates/pending/dummy", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	err := client.DeletePendingTeammate(context.TODO(), "kenzo.tanaka")
+	err := client.DeletePendingTeammate(context.TODO(), "dummy")
 	if err == nil {
 		t.Fatal("expected an error but got none")
 	}
