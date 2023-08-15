@@ -18,12 +18,12 @@ func handler() error {
 	apiKey := os.Getenv("SENDGRID_API_KEY")
 
 	c := sendgrid.New(apiKey, sendgrid.OptionDebug(true))
-	users, err := c.GetTeammates(context.TODO())
+	r, err := c.GetTeammates(context.TODO())
 	if err != nil {
 		return err
 	}
 
-	for _, u := range users {
+	for _, u := range r.Teammates {
 		log.Printf("user: %#v", u)
 	}
 

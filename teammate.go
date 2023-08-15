@@ -5,31 +5,25 @@ import (
 	"fmt"
 )
 
-type User struct {
+type OutputGetTeammate struct {
 	Username  string   `json:"username,omitempty"`
-	Email     string   `json:"email,omitempty"`
 	FirstName string   `json:"first_name,omitempty"`
 	LastName  string   `json:"last_name,omitempty"`
+	Email     string   `json:"email,omitempty"`
+	Scopes    []string `json:"scopes,omitempty"`
+	UserType  string   `json:"user_type,omitempty"`
+	IsAdmin   bool     `json:"is_admin,omitempty"`
+	Phone     string   `json:"phone,omitempty"`
+	Website   string   `json:"website,omitempty"`
 	Address   string   `json:"address,omitempty"`
 	Address2  string   `json:"address2,omitempty"`
 	City      string   `json:"city,omitempty"`
 	State     string   `json:"state,omitempty"`
 	Zip       string   `json:"zip,omitempty"`
 	Country   string   `json:"country,omitempty"`
-	Company   string   `json:"company,omitempty"`
-	Website   string   `json:"website,omitempty"`
-	Phone     string   `json:"phone,omitempty"`
-	IsAdmin   bool     `json:"is_admin,omitempty"`
-	IsSSO     bool     `json:"is_sso,omitempty"`
-	UserType  string   `json:"user_type,omitempty"`
-	Scopes    []string `json:"scopes,omitempty"`
-
-	IsReadOnly     bool   `json:"is_read_only,omitempty"`
-	Token          string `json:"token,omitempty"`
-	ExpirationDate int    `json:"expiration_date,omitempty"`
 }
 
-func (c *Client) GetTeammate(ctx context.Context, username string) (*User, error) {
+func (c *Client) GetTeammate(ctx context.Context, username string) (*OutputGetTeammate, error) {
 	u := fmt.Sprintf("/teammates/%s", username)
 
 	req, err := c.NewRequest("GET", u, nil)
@@ -37,48 +31,73 @@ func (c *Client) GetTeammate(ctx context.Context, username string) (*User, error
 		return nil, err
 	}
 
-	user := new(User)
-	if err := c.Do(ctx, req, &user); err != nil {
+	r := new(OutputGetTeammate)
+	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return r, nil
 }
 
-func (c *Client) GetTeammates(ctx context.Context) ([]*User, error) {
+type Teammate struct {
+	Username  string `json:"username,omitempty"`
+	Email     string `json:"email,omitempty"`
+	FirstName string `json:"first_name,omitempty"`
+	LastName  string `json:"last_name,omitempty"`
+	UserType  string `json:"user_type,omitempty"`
+	IsAdmin   bool   `json:"is_admin,omitempty"`
+	Phone     string `json:"phone,omitempty"`
+	Website   string `json:"website,omitempty"`
+	Address   string `json:"address,omitempty"`
+	Address2  string `json:"address2,omitempty"`
+	City      string `json:"city,omitempty"`
+	State     string `json:"state,omitempty"`
+	Zip       string `json:"zip,omitempty"`
+	Country   string `json:"country,omitempty"`
+}
+
+type OutputGetTeammates struct {
+	Teammates []Teammate `json:"result,omitempty"`
+}
+
+func (c *Client) GetTeammates(ctx context.Context) (*OutputGetTeammates, error) {
 	req, err := c.NewRequest("GET", "/teammates", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	type Response struct {
-		Users []*User `json:"result,omitempty"`
-	}
-
-	r := new(Response)
+	r := new(OutputGetTeammates)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
 
-	return r.Users, nil
+	return r, nil
 }
 
-func (c *Client) GetPendingTeammates(ctx context.Context) ([]*User, error) {
+type PendingTeammate struct {
+	Email          string   `json:"email,omitempty"`
+	Scopes         []string `json:"scopes,omitempty"`
+	IsAdmin        bool     `json:"is_admin,omitempty"`
+	Token          string   `json:"token,omitempty"`
+	ExpirationDate int      `json:"expiration_date,omitempty"`
+}
+
+type OutputGetPendingTeammates struct {
+	PendingTeammates []PendingTeammate `json:"result,omitempty"`
+}
+
+func (c *Client) GetPendingTeammates(ctx context.Context) (*OutputGetPendingTeammates, error) {
 	req, err := c.NewRequest("GET", "/teammates/pending", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	type Response struct {
-		Users []*User `json:"result,omitempty"`
-	}
-
-	r := new(Response)
+	r := new(OutputGetPendingTeammates)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
 
-	return r.Users, nil
+	return r, nil
 }
 
 type InputInviteTeammate struct {
@@ -87,17 +106,24 @@ type InputInviteTeammate struct {
 	Scopes  []string `json:"scopes"`
 }
 
-func (c *Client) InviteTeammate(ctx context.Context, input *InputInviteTeammate) (*User, error) {
+type OutputInviteTeammate struct {
+	Token   string   `json:"token,omitempty"`
+	Email   string   `json:"email"`
+	IsAdmin bool     `json:"is_admin"`
+	Scopes  []string `json:"scopes"`
+}
+
+func (c *Client) InviteTeammate(ctx context.Context, input *InputInviteTeammate) (*OutputInviteTeammate, error) {
 	req, err := c.NewRequest("POST", "/teammates", input)
 	if err != nil {
 		return nil, err
 	}
 
-	user := new(User)
-	if err := c.Do(ctx, req, &user); err != nil {
+	r := new(OutputInviteTeammate)
+	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
-	return user, nil
+	return r, nil
 }
 
 type InputUpdateTeammatePermissions struct {
@@ -105,7 +131,25 @@ type InputUpdateTeammatePermissions struct {
 	Scopes  []string `json:"scopes"`
 }
 
-func (c *Client) UpdateTeammatePermissions(ctx context.Context, username string, input *InputUpdateTeammatePermissions) (*User, error) {
+type OutputUpdateTeammatePermissions struct {
+	Username  string   `json:"username,omitempty"`
+	FirstName string   `json:"first_name,omitempty"`
+	LastName  string   `json:"last_name,omitempty"`
+	Email     string   `json:"email,omitempty"`
+	Scopes    []string `json:"scopes,omitempty"`
+	UserType  string   `json:"user_type,omitempty"`
+	IsAdmin   bool     `json:"is_admin,omitempty"`
+	Phone     string   `json:"phone,omitempty"`
+	Website   string   `json:"website,omitempty"`
+	Address   string   `json:"address,omitempty"`
+	Address2  string   `json:"address2,omitempty"`
+	City      string   `json:"city,omitempty"`
+	State     string   `json:"state,omitempty"`
+	Zip       string   `json:"zip,omitempty"`
+	Country   string   `json:"country,omitempty"`
+}
+
+func (c *Client) UpdateTeammatePermissions(ctx context.Context, username string, input *InputUpdateTeammatePermissions) (*OutputUpdateTeammatePermissions, error) {
 	u := fmt.Sprintf("/teammates/%s", username)
 
 	req, err := c.NewRequest("PATCH", u, input)
@@ -113,11 +157,11 @@ func (c *Client) UpdateTeammatePermissions(ctx context.Context, username string,
 		return nil, err
 	}
 
-	user := new(User)
-	if err := c.Do(ctx, req, &user); err != nil {
+	r := new(OutputUpdateTeammatePermissions)
+	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
-	return user, nil
+	return r, nil
 }
 
 func (c *Client) DeleteTeammate(ctx context.Context, username string) error {
