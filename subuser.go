@@ -8,7 +8,7 @@ import (
 )
 
 type Subuser struct {
-	ID       int    `json:"id,omitempty"`
+	ID       int64  `json:"id,omitempty"`
 	Disabled bool   `json:"disabled,omitempty"`
 	Username string `json:"username,omitempty"`
 	Email    string `json:"email,omitempty"`
