@@ -84,7 +84,6 @@ type OutputCreateSubuser struct {
 	Email              string           `json:"email"`
 	SignupSessionToken string           `json:"signup_session_token"`
 	AuthorizationToken string           `json:"authorization_token"`
-	Password           string           `json:"password"`
 	CreditAllocation   CreditAllocation `json:"credit_allocation"`
 }
 
