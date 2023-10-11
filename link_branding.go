@@ -229,7 +229,7 @@ func (c *Client) DisassociateBrandedLinkWithSubuser(ctx context.Context, usernam
 }
 
 type InputUpdateBrandedLink struct {
-	Default bool `json:"default,omitempty"`
+	Default bool `json:"default"`
 }
 
 type OutputUpdateBrandedLink struct {
