@@ -166,7 +166,7 @@ type OutputUpdateVerifiedSender struct {
 
 func (c *Client) UpdateVerifiedSender(ctx context.Context, id int64, input *InputUpdateVerifiedSender) (*OutputUpdateVerifiedSender, error) {
 	path := fmt.Sprintf("/verified_senders/%s", strconv.FormatInt(id, 10))
-	req, err := c.NewRequest("PATCH", path, nil)
+	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
 		return nil, err
 	}
