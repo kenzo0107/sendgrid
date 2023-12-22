@@ -27,7 +27,7 @@ type VerifiedSender struct {
 type InputGetVerifiedSenders struct {
 	Limit      int
 	LastSeenID int
-	ID         int
+	ID         int64
 }
 
 type OutputGetVerifiedSenders struct {
@@ -47,7 +47,7 @@ func (c *Client) GetVerifiedSenders(ctx context.Context, input *InputGetVerified
 		q.Set("lastSeenID", strconv.Itoa(input.LastSeenID))
 	}
 	if input.ID > 0 {
-		q.Set("id", strconv.Itoa(input.ID))
+		q.Set("id", strconv.FormatInt(input.ID, 10))
 	}
 	u.RawQuery = q.Encode()
 
