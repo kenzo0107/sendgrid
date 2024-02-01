@@ -12,6 +12,20 @@ import (
 
 // ErrorResponse is sendgrid error response
 type ErrorResponse struct {
+	Error string `json:"error"`
+}
+
+// Err : error
+func (t ErrorResponse) Err() error {
+	if len(t.Error) == 0 {
+		return nil
+	}
+
+	return errors.New(t.Error)
+}
+
+// ErrorsResponse is sendgrid error response
+type ErrorsResponse struct {
 	Errors []*Error `json:"errors"`
 }
 
@@ -21,8 +35,8 @@ type Error struct {
 	Message *string `json:"message,omitempty"`
 }
 
-// Errs : error
-func (t ErrorResponse) Errs() error {
+// Errs : error list
+func (t ErrorsResponse) Errs() error {
 	s := []string{}
 	for _, err := range t.Errors {
 		var msg strings.Builder
@@ -68,9 +82,18 @@ func checkStatusCode(resp *http.Response, d debug) error {
 		return err
 	}
 
+	// {"error": "error message"}
 	errorResponse := new(ErrorResponse)
 	if err := newJSONParser(errorResponse)(resp); err == nil {
-		return errorResponse.Errs()
+		if errorResponse.Err() != nil {
+			return errorResponse.Err()
+		}
+	}
+
+	// {"errors": [{"field": "field name", "message": "error message"}]}
+	errorsResponse := new(ErrorsResponse)
+	if err := newJSONParser(errorsResponse)(resp); err == nil {
+		return errorsResponse.Errs()
 	}
 
 	return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
