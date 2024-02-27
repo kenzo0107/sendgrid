@@ -17,7 +17,7 @@ func TestGetSSOCertificate(t *testing.T) {
 
 	mux.HandleFunc("/sso/certificates/123456", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, `{
-			"id": "123456",
+			"id": 123456,
 			"public_certificate": "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 			"not_before": 1586137600,
 			"not_after": 1586137600,
@@ -34,7 +34,7 @@ func TestGetSSOCertificate(t *testing.T) {
 	}
 
 	want := &OutputGetSSOCertificate{
-		ID:                "123456",
+		ID:                123456,
 		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 		NotBefore:         1586137600,
 		NotAfter:          1586137600,
@@ -66,7 +66,7 @@ func TestGetSSOCertificates(t *testing.T) {
 	mux.HandleFunc("/sso/integrations/abcdef/certificates", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, `[
 			{
-				"id": "123456",
+				"id": 123456,
 				"public_certificate": "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 				"not_before": 1586137600,
 				"not_after": 1586137600,
@@ -85,7 +85,7 @@ func TestGetSSOCertificates(t *testing.T) {
 
 	want := []*SSOCertificate{
 		{
-			ID:                "123456",
+			ID:                123456,
 			PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 			NotBefore:         1586137600,
 			NotAfter:          1586137600,
@@ -117,7 +117,7 @@ func TestCreateSSOCertificate(t *testing.T) {
 
 	mux.HandleFunc("/sso/certificates", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, `{
-			"id": "123456",
+			"id": 123456,
 			"public_certificate": "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 			"not_before": 1586137600,
 			"not_after": 1586137600,
@@ -138,7 +138,7 @@ func TestCreateSSOCertificate(t *testing.T) {
 	}
 
 	want := &OutputCreateSSOCertificate{
-		ID:                "123456",
+		ID:                123456,
 		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 		NotBefore:         1586137600,
 		NotAfter:          1586137600,
@@ -173,7 +173,7 @@ func TestUpdateSSOCertificate(t *testing.T) {
 
 	mux.HandleFunc("/sso/certificates/123456", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := fmt.Fprint(w, `{
-			"id": "123456",
+			"id": 123456,
 			"public_certificate": "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 			"not_before": 1586137600,
 			"not_after": 1586137600,
@@ -194,7 +194,7 @@ func TestUpdateSSOCertificate(t *testing.T) {
 	}
 
 	want := &OutputUpdateSSOCertificate{
-		ID:                "123456",
+		ID:                123456,
 		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
 		NotBefore:         1586137600,
 		NotAfter:          1586137600,

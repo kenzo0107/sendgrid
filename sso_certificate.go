@@ -6,7 +6,7 @@ import (
 )
 
 type OutputGetSSOCertificate struct {
-	ID                string `json:"id,omitempty"`
+	ID                int64  `json:"id,omitempty"`
 	PublicCertificate string `json:"public_certificate,omitempty"`
 	NotBefore         int64  `json:"not_before,omitempty"`
 	NotAfter          int64  `json:"not_after,omitempty"`
@@ -31,7 +31,7 @@ func (c *Client) GetSSOCertificate(ctx context.Context, id int64) (*OutputGetSSO
 }
 
 type SSOCertificate struct {
-	ID                string `json:"id,omitempty"`
+	ID                int64  `json:"id,omitempty"`
 	PublicCertificate string `json:"public_certificate,omitempty"`
 	NotBefore         int64  `json:"not_before,omitempty"`
 	NotAfter          int64  `json:"not_after,omitempty"`
@@ -62,7 +62,7 @@ type InputCreateSSOCertificate struct {
 }
 
 type OutputCreateSSOCertificate struct {
-	ID                string `json:"id,omitempty"`
+	ID                int64  `json:"id,omitempty"`
 	PublicCertificate string `json:"public_certificate,omitempty"`
 	NotBefore         int64  `json:"not_before,omitempty"`
 	NotAfter          int64  `json:"not_after,omitempty"`
@@ -90,7 +90,7 @@ type InputUpdateSSOCertificate struct {
 }
 
 type OutputUpdateSSOCertificate struct {
-	ID                string `json:"id,omitempty"`
+	ID                int64  `json:"id,omitempty"`
 	PublicCertificate string `json:"public_certificate,omitempty"`
 	NotBefore         int64  `json:"not_before,omitempty"`
 	NotAfter          int64  `json:"not_after,omitempty"`
