@@ -111,6 +111,62 @@ func TestGetSSOCertificates_Failed(t *testing.T) {
 	}
 }
 
+func TestCreateSSOCertificate(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/certificates", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": "123456",
+			"public_certificate": "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
+			"not_before": 1586137600,
+			"not_after": 1586137600,
+			"integration_id": "abcdef"
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateSSOCertificate(context.TODO(), &InputCreateSSOCertificate{
+		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
+		Enabled:           true,
+		IntegrationID:     "abcdef",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputCreateSSOCertificate{
+		ID:                "123456",
+		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
+		NotBefore:         1586137600,
+		NotAfter:          1586137600,
+		IntegrationID:     "abcdef",
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestCreateSSOCertificate_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/certificates", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.CreateSSOCertificate(context.TODO(), &InputCreateSSOCertificate{
+		PublicCertificate: "-----BEGIN CERTIFICATE-----\nMIIC0DCCAbigAwIBAgIJAOT==\n-----END CERTIFICATE-----",
+		Enabled:           true,
+		IntegrationID:     "abcdef",
+	})
+	if err == nil {
+		t.Error("expected an error")
+	}
+}
+
 func TestUpdateSSOCertificate(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
