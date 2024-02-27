@@ -55,6 +55,34 @@ func (c *Client) GetSSOCertificates(ctx context.Context, integrationID string) (
 	return r, nil
 }
 
+type InputCreateSSOCertificate struct {
+	PublicCertificate string `json:"public_certificate,omitempty"`
+	Enabled           bool   `json:"enabled,omitempty"`
+	IntegrationID     string `json:"integration_id,omitempty"`
+}
+
+type OutputCreateSSOCertificate struct {
+	ID                string `json:"id,omitempty"`
+	PublicCertificate string `json:"public_certificate,omitempty"`
+	NotBefore         int64  `json:"not_before,omitempty"`
+	NotAfter          int64  `json:"not_after,omitempty"`
+	IntegrationID     string `json:"integration_id,omitempty"`
+}
+
+func (c *Client) CreateSSOCertificate(ctx context.Context, input *InputCreateSSOCertificate) (*OutputCreateSSOCertificate, error) {
+	req, err := c.NewRequest("POST", "/sso/certificates", input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputCreateSSOCertificate)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
 type InputUpdateSSOCertificate struct {
 	PublicCertificate string `json:"public_certificate,omitempty"`
 	Enabled           bool   `json:"enabled,omitempty"`
