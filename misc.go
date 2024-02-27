@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httputil"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
@@ -27,6 +29,14 @@ func (t ErrorResponse) Err() error {
 // ErrorsResponse is sendgrid error response
 type ErrorsResponse struct {
 	Errors []*Error `json:"errors"`
+}
+
+type RateLimitedError struct {
+	RetryAfter time.Duration
+}
+
+func (e *RateLimitedError) Error() string {
+	return fmt.Sprintf("sendgrid rate limit exceeded, retry after %s", e.RetryAfter)
 }
 
 // Error is sendgrid error
@@ -73,6 +83,16 @@ func (t statusCodeError) HTTPStatusCode() int {
 }
 
 func checkStatusCode(resp *http.Response, d debug) error {
+	if resp.StatusCode == http.StatusTooManyRequests {
+		xRateLimitReset, err := strconv.ParseInt(resp.Header.Get("X-RateLimit-Reset"), 10, 64)
+		if err != nil {
+			return err
+		}
+
+		retryAfter := time.Until(time.Unix(xRateLimitReset, 0))
+		return &RateLimitedError{retryAfter}
+	}
+
 	// return no error if response returns status code 2xx
 	if resp.StatusCode/100 == 2 {
 		return nil
@@ -95,7 +115,6 @@ func checkStatusCode(resp *http.Response, d debug) error {
 	if err := newJSONParser(errorsResponse)(resp); err == nil {
 		return errorsResponse.Errs()
 	}
-
 	return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 }
 

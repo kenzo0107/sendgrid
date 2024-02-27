@@ -48,6 +48,7 @@ func setupWithPath() (client *Client, mux *http.ServeMux, serverURL string, tear
 		OptionHTTPClient(&http.Client{}),
 		OptionDebug(false),
 		OptionLog(log.New(os.Stderr, "kenzo0107/sendgrid", log.LstdFlags|log.Lshortfile)),
+		OptionMaxRetryCount(5),
 	)
 
 	return client, mux, server.URL, server.Close

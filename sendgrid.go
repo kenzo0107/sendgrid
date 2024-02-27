@@ -12,6 +12,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/google/go-querystring/query"
 	"github.com/pkg/errors"
@@ -26,12 +27,13 @@ type httpClient interface {
 
 // Client : sendgrid client
 type Client struct {
-	apiKey     string
-	baseURL    *url.URL
-	debug      bool
-	log        ilogger
-	httpclient httpClient
-	subuser    string
+	apiKey        string
+	baseURL       *url.URL
+	debug         bool
+	log           ilogger
+	httpclient    httpClient
+	subuser       string
+	maxRetryCount int
 }
 
 // Option defines an option for a Client
@@ -73,13 +75,22 @@ func OptionLog(l logger) func(*Client) {
 	}
 }
 
+func OptionMaxRetryCount(maxRetryCount int) func(*Client) {
+	return func(c *Client) {
+		c.maxRetryCount = maxRetryCount
+	}
+}
+
+const defaultMaxRetryCount = 3
+
 // New builds a sendgrid client from the provided token, baseURL and options
 func New(apiKey string, options ...Option) *Client {
 	s := &Client{
-		apiKey:     apiKey,
-		baseURL:    defaultBaseURL,
-		httpclient: &http.Client{},
-		log:        log.New(os.Stderr, "kenzo0107/sendgrid", log.LstdFlags|log.Lshortfile),
+		apiKey:        apiKey,
+		baseURL:       defaultBaseURL,
+		httpclient:    &http.Client{},
+		log:           log.New(os.Stderr, "kenzo0107/sendgrid", log.LstdFlags|log.Lshortfile),
+		maxRetryCount: defaultMaxRetryCount,
 	}
 
 	for _, opt := range options {
@@ -173,7 +184,28 @@ func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Requ
 //
 // The provided ctx must be non-nil, if it is nil an error is returned. If it is canceled or times out,
 // ctx.Err() will be returned.
-func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) error {
+func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (err error) {
+	for retries := 0; retries < c.maxRetryCount; retries++ {
+		err = c.doRequest(ctx, req, v)
+		if err == nil {
+			break
+		}
+
+		// NOTE: when rate limit error occurs, wait until reset time and execute again
+		if rateLimitedError, ok := err.(*RateLimitedError); ok {
+			c.Debugln("rate limited error occurred", err)
+			select {
+			case <-ctx.Done():
+				err = ctx.Err()
+			case <-time.After(rateLimitedError.RetryAfter):
+				err = nil
+			}
+		}
+	}
+	return err
+}
+
+func (c *Client) doRequest(ctx context.Context, req *http.Request, v interface{}) error {
 	if ctx == nil {
 		return errors.New("context must be non-nil")
 	}
