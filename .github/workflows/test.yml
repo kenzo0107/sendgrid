@@ -11,19 +11,23 @@ on:
 
 jobs:
   test:
-    strategy:
-      matrix:
-        go-version: [1.21.x]
-        platform: [ubuntu-latest]
-    runs-on: ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+
+      - name: Pick golang_info
+        id: go
+        run: echo ::set-output name=version::$(grep golang .tool-versions | awk '{print $2}')
+
+      - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
-      - uses: actions/checkout@v3
+          go-version: ${{ steps.go.outputs.version }}
+
       - run: go test -v -count=1 -race -cover -coverprofile=coverage ./...
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage

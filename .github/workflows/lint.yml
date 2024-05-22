@@ -11,15 +11,17 @@ on:
 
 jobs:
   lint:
-    strategy:
-      matrix:
-        go-version: [1.21.x]
-        os: [ubuntu-latest]
     name: lint
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v4
+      - uses: actions/checkout@v4
+
+      - name: Pick golang_info
+        id: go
+        run: echo ::set-output name=version::$(grep golang .tool-versions | awk '{print $2}')
+
+      - uses: actions/setup-go@v5
         with:
-          go-version: ${{ matrix.go-version }}
+          go-version: ${{ steps.go.outputs.version }}
       - run: make lint
