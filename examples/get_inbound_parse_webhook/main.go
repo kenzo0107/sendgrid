@@ -18,7 +18,7 @@ func handler() error {
 	apiKey := os.Getenv("SENDGRID_API_KEY")
 
 	c := sendgrid.New(apiKey, sendgrid.OptionDebug(true))
-	r, err := c.GetInboundParsetWebhook(context.TODO(), "bar.foo")
+	r, err := c.GetInboundParseWebhook(context.TODO(), "bar.foo")
 	if err != nil {
 		return err
 	}

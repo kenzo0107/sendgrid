@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-func TestGetInboundParsetWebhooks(t *testing.T) {
+func TestGetInboundParseWebhooks(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -30,13 +30,13 @@ func TestGetInboundParsetWebhooks(t *testing.T) {
 		}
 	})
 
-	expected, err := client.GetInboundParsetWebhooks(context.TODO())
+	expected, err := client.GetInboundParseWebhooks(context.TODO())
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	want := []*InboundParsetWebhook{
+	want := []*InboundParseWebhook{
 		{
 			URL:       "https://example.com",
 			Hostname:  "bar.foo",
@@ -50,7 +50,7 @@ func TestGetInboundParsetWebhooks(t *testing.T) {
 	}
 }
 
-func TestGetInboundParsetWebhooks_Failed(t *testing.T) {
+func TestGetInboundParseWebhooks_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -58,13 +58,13 @@ func TestGetInboundParsetWebhooks_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.GetInboundParsetWebhooks(context.TODO())
+	_, err := client.GetInboundParseWebhooks(context.TODO())
 	if err == nil {
 		t.Fatal("expected an error but got nil")
 	}
 }
 
-func TestGetInboundParsetWebhook(t *testing.T) {
+func TestGetInboundParseWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -79,13 +79,13 @@ func TestGetInboundParsetWebhook(t *testing.T) {
 		}
 	})
 
-	expected, err := client.GetInboundParsetWebhook(context.TODO(), "bar.foo")
+	expected, err := client.GetInboundParseWebhook(context.TODO(), "bar.foo")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 
-	want := &OutputGetInboundParsetWebhook{
+	want := &OutputGetInboundParseWebhook{
 		URL:       "https://example.com",
 		Hostname:  "bar.foo",
 		SpamCheck: false,
@@ -97,7 +97,7 @@ func TestGetInboundParsetWebhook(t *testing.T) {
 	}
 }
 
-func TestGetInboundParsetWebhook_Failed(t *testing.T) {
+func TestGetInboundParseWebhook_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -105,13 +105,13 @@ func TestGetInboundParsetWebhook_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.GetInboundParsetWebhook(context.TODO(), "bar.foo")
+	_, err := client.GetInboundParseWebhook(context.TODO(), "bar.foo")
 	if err == nil {
 		t.Fatal("expected an error but got nil")
 	}
 }
 
-func TestCreateInboundParsetWebhook(t *testing.T) {
+func TestCreateInboundParseWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -126,7 +126,7 @@ func TestCreateInboundParsetWebhook(t *testing.T) {
 		}
 	})
 
-	expected, err := client.CreateInboundParsetWebhook(context.TODO(), &InputCreateInboundParsetWebhook{
+	expected, err := client.CreateInboundParseWebhook(context.TODO(), &InputCreateInboundParseWebhook{
 		URL:       "https://example.com",
 		Hostname:  "foo.bar",
 		SpamCheck: false,
@@ -137,7 +137,7 @@ func TestCreateInboundParsetWebhook(t *testing.T) {
 		return
 	}
 
-	want := &OutputCreateInboundParsetWebhook{
+	want := &OutputCreateInboundParseWebhook{
 		URL:       "https://example.com",
 		Hostname:  "foo.bar",
 		SpamCheck: false,
@@ -149,7 +149,7 @@ func TestCreateInboundParsetWebhook(t *testing.T) {
 	}
 }
 
-func TestCreateInboundParsetWebhook_Failed(t *testing.T) {
+func TestCreateInboundParseWebhook_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -157,7 +157,7 @@ func TestCreateInboundParsetWebhook_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.CreateInboundParsetWebhook(context.TODO(), &InputCreateInboundParsetWebhook{
+	_, err := client.CreateInboundParseWebhook(context.TODO(), &InputCreateInboundParseWebhook{
 		URL:       "https://example.com",
 		Hostname:  "foo.bar",
 		SpamCheck: false,
@@ -168,7 +168,7 @@ func TestCreateInboundParsetWebhook_Failed(t *testing.T) {
 	}
 }
 
-func TestUpdateInboundParsetWebhook(t *testing.T) {
+func TestUpdateInboundParseWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -183,7 +183,7 @@ func TestUpdateInboundParsetWebhook(t *testing.T) {
 		}
 	})
 
-	expected, err := client.UpdateInboundParsetWebhook(context.TODO(), "foo.bar", &InputUpdateInboundParsetWebhook{
+	expected, err := client.UpdateInboundParseWebhook(context.TODO(), "foo.bar", &InputUpdateInboundParseWebhook{
 		URL:       "https://example.com",
 		SpamCheck: false,
 		SendRaw:   false,
@@ -193,7 +193,7 @@ func TestUpdateInboundParsetWebhook(t *testing.T) {
 		return
 	}
 
-	want := &OutputUpdateInboundParsetWebhook{
+	want := &OutputUpdateInboundParseWebhook{
 		URL:       "https://example.com",
 		Hostname:  "foo.bar",
 		SpamCheck: false,
@@ -205,7 +205,7 @@ func TestUpdateInboundParsetWebhook(t *testing.T) {
 	}
 }
 
-func TestUpdateInboundParsetWebhook_Failed(t *testing.T) {
+func TestUpdateInboundParseWebhook_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -213,7 +213,7 @@ func TestUpdateInboundParsetWebhook_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	_, err := client.UpdateInboundParsetWebhook(context.TODO(), "foo.bar", &InputUpdateInboundParsetWebhook{
+	_, err := client.UpdateInboundParseWebhook(context.TODO(), "foo.bar", &InputUpdateInboundParseWebhook{
 		URL:       "https://example.com",
 		SpamCheck: false,
 		SendRaw:   false,
@@ -223,7 +223,7 @@ func TestUpdateInboundParsetWebhook_Failed(t *testing.T) {
 	}
 }
 
-func TestDeleteInboundParsetWebhook(t *testing.T) {
+func TestDeleteInboundParseWebhook(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -231,14 +231,14 @@ func TestDeleteInboundParsetWebhook(t *testing.T) {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-	err := client.DeleteInboundParsetWebhook(context.TODO(), "foo.bar")
+	err := client.DeleteInboundParseWebhook(context.TODO(), "foo.bar")
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
 		return
 	}
 }
 
-func TestDeleteInboundParsetWebhook_Failed(t *testing.T) {
+func TestDeleteInboundParseWebhook_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
 
@@ -246,7 +246,7 @@ func TestDeleteInboundParsetWebhook_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 
-	err := client.DeleteInboundParsetWebhook(context.TODO(), "foo.bar")
+	err := client.DeleteInboundParseWebhook(context.TODO(), "foo.bar")
 	if err == nil {
 		t.Fatal("expected an error but got nil")
 	}

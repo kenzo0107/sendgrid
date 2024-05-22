@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-type OutputGetInboundParsetWebhooks struct {
-	Result []*InboundParsetWebhook `json:"result,omitempty"`
+type OutputGetInboundParseWebhooks struct {
+	Result []*InboundParseWebhook `json:"result,omitempty"`
 }
 
-type InboundParsetWebhook struct {
+type InboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
@@ -17,13 +17,13 @@ type InboundParsetWebhook struct {
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/retrieve-all-parse-settings
-func (c *Client) GetInboundParsetWebhooks(ctx context.Context) ([]*InboundParsetWebhook, error) {
+func (c *Client) GetInboundParseWebhooks(ctx context.Context) ([]*InboundParseWebhook, error) {
 	req, err := c.NewRequest("GET", "/user/webhooks/parse/settings", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	r := new(OutputGetInboundParsetWebhooks)
+	r := new(OutputGetInboundParseWebhooks)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (c *Client) GetInboundParsetWebhooks(ctx context.Context) ([]*InboundParset
 	return r.Result, nil
 }
 
-type OutputGetInboundParsetWebhook struct {
+type OutputGetInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
@@ -39,7 +39,7 @@ type OutputGetInboundParsetWebhook struct {
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/retrieve-a-specific-parse-setting
-func (c *Client) GetInboundParsetWebhook(ctx context.Context, hostname string) (*OutputGetInboundParsetWebhook, error) {
+func (c *Client) GetInboundParseWebhook(ctx context.Context, hostname string) (*OutputGetInboundParseWebhook, error) {
 	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
 
 	req, err := c.NewRequest("GET", path, nil)
@@ -47,7 +47,7 @@ func (c *Client) GetInboundParsetWebhook(ctx context.Context, hostname string) (
 		return nil, err
 	}
 
-	r := new(OutputGetInboundParsetWebhook)
+	r := new(OutputGetInboundParseWebhook)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
@@ -55,14 +55,14 @@ func (c *Client) GetInboundParsetWebhook(ctx context.Context, hostname string) (
 	return r, nil
 }
 
-type InputCreateInboundParsetWebhook struct {
+type InputCreateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
 	SendRaw   bool   `json:"send_raw,omitempty"`
 }
 
-type OutputCreateInboundParsetWebhook struct {
+type OutputCreateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
@@ -70,13 +70,13 @@ type OutputCreateInboundParsetWebhook struct {
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/create-a-parse-setting
-func (c *Client) CreateInboundParsetWebhook(ctx context.Context, input *InputCreateInboundParsetWebhook) (*OutputCreateInboundParsetWebhook, error) {
+func (c *Client) CreateInboundParseWebhook(ctx context.Context, input *InputCreateInboundParseWebhook) (*OutputCreateInboundParseWebhook, error) {
 	req, err := c.NewRequest("POST", "/user/webhooks/parse/settings", input)
 	if err != nil {
 		return nil, err
 	}
 
-	r := new(OutputCreateInboundParsetWebhook)
+	r := new(OutputCreateInboundParseWebhook)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
@@ -84,13 +84,13 @@ func (c *Client) CreateInboundParsetWebhook(ctx context.Context, input *InputCre
 	return r, nil
 }
 
-type InputUpdateInboundParsetWebhook struct {
+type InputUpdateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
 	SendRaw   bool   `json:"send_raw,omitempty"`
 }
 
-type OutputUpdateInboundParsetWebhook struct {
+type OutputUpdateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
 	SpamCheck bool   `json:"spam_check,omitempty"`
@@ -98,7 +98,7 @@ type OutputUpdateInboundParsetWebhook struct {
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/update-a-parse-setting
-func (c *Client) UpdateInboundParsetWebhook(ctx context.Context, hostname string, input *InputUpdateInboundParsetWebhook) (*OutputUpdateInboundParsetWebhook, error) {
+func (c *Client) UpdateInboundParseWebhook(ctx context.Context, hostname string, input *InputUpdateInboundParseWebhook) (*OutputUpdateInboundParseWebhook, error) {
 	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
 
 	req, err := c.NewRequest("PATCH", path, input)
@@ -106,7 +106,7 @@ func (c *Client) UpdateInboundParsetWebhook(ctx context.Context, hostname string
 		return nil, err
 	}
 
-	r := new(OutputUpdateInboundParsetWebhook)
+	r := new(OutputUpdateInboundParseWebhook)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (c *Client) UpdateInboundParsetWebhook(ctx context.Context, hostname string
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/delete-a-parse-setting
-func (c *Client) DeleteInboundParsetWebhook(ctx context.Context, hostname string) error {
+func (c *Client) DeleteInboundParseWebhook(ctx context.Context, hostname string) error {
 	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
 
 	req, err := c.NewRequest("DELETE", path, nil)
