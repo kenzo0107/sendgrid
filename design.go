@@ -77,7 +77,7 @@ type InputCreateDesign struct {
 	Editor               string   `json:"editor,omitempty"`
 	HTMLContent          string   `json:"html_content,omitempty"`
 	PlainContent         string   `json:"plain_content,omitempty"`
-	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content"`
 	Subject              string   `json:"subject,omitempty"`
 	Categories           []string `json:"categories,omitempty"`
 }
@@ -115,7 +115,7 @@ type InputUpdateDesign struct {
 	Name                 string   `json:"name,omitempty"`
 	HTMLContent          string   `json:"html_content,omitempty"`
 	PlainContent         string   `json:"plain_content,omitempty"`
-	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content"`
 	Subject              string   `json:"subject,omitempty"`
 	Categories           []string `json:"categories,omitempty"`
 }

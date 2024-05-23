@@ -81,11 +81,11 @@ func (c *Client) GetSSOIntegrations(ctx context.Context, input *InputGetSSOInteg
 
 type InputCreateSSOIntegration struct {
 	Name                 string `json:"name,omitempty"`
-	Enabled              bool   `json:"enabled,omitempty"`
+	Enabled              bool   `json:"enabled"`
 	SigninURL            string `json:"signin_url,omitempty"`
 	SignoutURL           string `json:"signout_url,omitempty"`
 	EntityID             string `json:"entity_id,omitempty"`
-	CompletedIntegration bool   `json:"completed_integration,omitempty"`
+	CompletedIntegration bool   `json:"completed_integration"`
 }
 
 type OutputCreateSSOIntegration struct {
@@ -118,11 +118,11 @@ func (c *Client) CreateSSOIntegration(ctx context.Context, input *InputCreateSSO
 
 type InputUpdateSSOIntegration struct {
 	Name                 string `json:"name,omitempty"`
-	Enabled              bool   `json:"enabled,omitempty"`
+	Enabled              bool   `json:"enabled"`
 	SigninURL            string `json:"signin_url,omitempty"`
 	SignoutURL           string `json:"signout_url,omitempty"`
 	EntityID             string `json:"entity_id,omitempty"`
-	CompletedIntegration bool   `json:"completed_integration,omitempty"`
+	CompletedIntegration bool   `json:"completed_integration"`
 }
 
 type OutputUpdateSSOIntegration struct {

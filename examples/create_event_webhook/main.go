@@ -19,7 +19,8 @@ func handler() error {
 
 	c := sendgrid.New(apiKey, sendgrid.OptionDebug(true))
 	r, err := c.CreateEventWebhook(context.TODO(), &sendgrid.InputCreateEventWebhook{
-		URL: "https://example.com",
+		URL:     "https://example.com",
+		Enabled: false,
 	})
 	if err != nil {
 		return err

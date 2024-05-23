@@ -51,7 +51,7 @@ func (c *Client) GetClickTrackingSettings(ctx context.Context) (*OutputGetClickT
 }
 
 type InputUpdateClickTrackingSettings struct {
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 }
 
 type OutputUpdateClickTrackingSettings struct {
@@ -94,7 +94,7 @@ func (c *Client) GetOpenTrackingSettings(ctx context.Context) (*OutputGetOpenTra
 }
 
 type InputUpdateOpenTrackingSettings struct {
-	Enabled bool `json:"enabled,omitempty"`
+	Enabled bool `json:"enabled"`
 }
 
 type OutputUpdateOpenTrackingSettings struct {
@@ -141,7 +141,7 @@ func (c *Client) GetGoogleAnalyticsSettings(ctx context.Context) (*OutputGetGoog
 }
 
 type InputUpdateGoogleAnalyticsSettings struct {
-	Enabled     bool   `json:"enabled,omitempty"`
+	Enabled     bool   `json:"enabled"`
 	UTMCampaign string `json:"utm_campaign,omitempty"`
 	UTMContent  string `json:"utm_content,omitempty"`
 	UTMMedium   string `json:"utm_medium,omitempty"`
@@ -198,7 +198,7 @@ func (c *Client) GetSubscriptionTrackingSettings(ctx context.Context) (*OutputGe
 }
 
 type InputUpdateSubscriptionTrackingSettings struct {
-	Enabled      bool   `json:"enabled,omitempty"`
+	Enabled      bool   `json:"enabled"`
 	HTMLContent  string `json:"html_content,omitempty"`
 	Landing      string `json:"landing,omitempty"`
 	PlainContent string `json:"plain_content,omitempty"`

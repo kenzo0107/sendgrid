@@ -58,8 +58,8 @@ func (c *Client) GetInboundParseWebhook(ctx context.Context, hostname string) (*
 type InputCreateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	SpamCheck bool   `json:"spam_check"`
+	SendRaw   bool   `json:"send_raw"`
 }
 
 type OutputCreateInboundParseWebhook struct {
@@ -86,8 +86,8 @@ func (c *Client) CreateInboundParseWebhook(ctx context.Context, input *InputCrea
 
 type InputUpdateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	SpamCheck bool   `json:"spam_check"`
+	SendRaw   bool   `json:"send_raw"`
 }
 
 type OutputUpdateInboundParseWebhook struct {
