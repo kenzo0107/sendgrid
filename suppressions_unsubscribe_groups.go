@@ -50,7 +50,7 @@ func (c *Client) GetSuppressionGroups(ctx context.Context) ([]*SuppressionGroup,
 type InputCreateSuppressionGroup struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
-	IsDefault   bool   `json:"is_default,omitempty"`
+	IsDefault   bool   `json:"is_default"`
 }
 
 type OutputCreateSuppressionGroup struct {
@@ -77,7 +77,7 @@ func (c *Client) CreateSuppressionGroup(ctx context.Context, input *InputCreateS
 type InputUpdateSuppressionGroup struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
-	IsDefault   bool   `json:"is_default,omitempty"`
+	IsDefault   bool   `json:"is_default"`
 }
 
 type OutputUpdateSuppressionGroup struct {

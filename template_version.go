@@ -43,7 +43,7 @@ type InputCreateTemplateVersion struct {
 	Name                 string `json:"name,omitempty"`
 	HTMLContent          string `json:"html_content,omitempty"`
 	PlainContent         string `json:"plain_content,omitempty"`
-	GeneratePlainContent bool   `json:"generate_plain_content,omitempty"`
+	GeneratePlainContent bool   `json:"generate_plain_content"`
 	Subject              string `json:"subject,omitempty"`
 	Editor               string `json:"editor,omitempty"`
 	TestData             string `json:"test_data,omitempty"`
@@ -85,7 +85,7 @@ type InputUpdateTemplateVersion struct {
 	Name                 string `json:"name,omitempty"`
 	HTMLContent          string `json:"html_content,omitempty"`
 	PlainContent         string `json:"plain_content,omitempty"`
-	GeneratePlainContent bool   `json:"generate_plain_content,omitempty"`
+	GeneratePlainContent bool   `json:"generate_plain_content"`
 	Subject              string `json:"subject,omitempty"`
 	Editor               string `json:"editor,omitempty"`
 	TestData             string `json:"test_data,omitempty"`

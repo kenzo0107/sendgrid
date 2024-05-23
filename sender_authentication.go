@@ -286,8 +286,8 @@ func (c *Client) ValidateDomainAuthentication(ctx context.Context, domainId int6
 }
 
 type InputUpdateDomainAuthentication struct {
-	Default   bool `json:"default,omitempty"`
-	CustomSpf bool `json:"custom_spf,omitempty"`
+	Default   bool `json:"default"`
+	CustomSpf bool `json:"custom_spf"`
 }
 
 type OutputUpdateDomainAuthentication struct {

@@ -85,19 +85,19 @@ func (c *Client) GetEventWebhooks(ctx context.Context) (*OutputGetEventWebhooks,
 }
 
 type InputCreateEventWebhook struct {
-	Enabled           bool   `json:"enabled,omitempty"`
+	Enabled           bool   `json:"enabled"`
 	URL               string `json:"url,omitempty"`
-	GroupResubscribe  bool   `json:"group_resubscribe,omitempty"`
-	Delivered         bool   `json:"delivered,omitempty"`
-	GroupUnsubscribe  bool   `json:"group_unsubscribe,omitempty"`
-	SpamReport        bool   `json:"spam_report,omitempty"`
-	Bounce            bool   `json:"bounce,omitempty"`
-	Deferred          bool   `json:"deferred,omitempty"`
-	Unsubscribe       bool   `json:"unsubscribe,omitempty"`
-	Processed         bool   `json:"processed,omitempty"`
-	Open              bool   `json:"open,omitempty"`
-	Click             bool   `json:"click,omitempty"`
-	Dropped           bool   `json:"dropped,omitempty"`
+	GroupResubscribe  bool   `json:"group_resubscribe"`
+	Delivered         bool   `json:"delivered"`
+	GroupUnsubscribe  bool   `json:"group_unsubscribe"`
+	SpamReport        bool   `json:"spam_report"`
+	Bounce            bool   `json:"bounce"`
+	Deferred          bool   `json:"deferred"`
+	Unsubscribe       bool   `json:"unsubscribe"`
+	Processed         bool   `json:"processed"`
+	Open              bool   `json:"open"`
+	Click             bool   `json:"click"`
+	Dropped           bool   `json:"dropped"`
 	FriendlyName      string `json:"friendly_name,omitempty"`
 	OAuthClientID     string `json:"oauth_client_id,omitempty"`
 	OAuthClientSecret string `json:"oauth_client_secret,omitempty"`
@@ -143,19 +143,19 @@ func (c *Client) CreateEventWebhook(ctx context.Context, input *InputCreateEvent
 }
 
 type InputUpdateEventWebhook struct {
-	Enabled           bool   `json:"enabled,omitempty"`
+	Enabled           bool   `json:"enabled"`
 	URL               string `json:"url,omitempty"`
-	GroupResubscribe  bool   `json:"group_resubscribe,omitempty"`
-	Delivered         bool   `json:"delivered,omitempty"`
-	GroupUnsubscribe  bool   `json:"group_unsubscribe,omitempty"`
-	SpamReport        bool   `json:"spam_report,omitempty"`
-	Bounce            bool   `json:"bounce,omitempty"`
-	Deferred          bool   `json:"deferred,omitempty"`
-	Unsubscribe       bool   `json:"unsubscribe,omitempty"`
-	Processed         bool   `json:"processed,omitempty"`
-	Open              bool   `json:"open,omitempty"`
-	Click             bool   `json:"click,omitempty"`
-	Dropped           bool   `json:"dropped,omitempty"`
+	GroupResubscribe  bool   `json:"group_resubscribe"`
+	Delivered         bool   `json:"delivered"`
+	GroupUnsubscribe  bool   `json:"group_unsubscribe"`
+	SpamReport        bool   `json:"spam_report"`
+	Bounce            bool   `json:"bounce"`
+	Deferred          bool   `json:"deferred"`
+	Unsubscribe       bool   `json:"unsubscribe"`
+	Processed         bool   `json:"processed"`
+	Open              bool   `json:"open"`
+	Click             bool   `json:"click"`
+	Dropped           bool   `json:"dropped"`
 	FriendlyName      string `json:"friendly_name,omitempty"`
 	OAuthClientID     string `json:"oauth_client_id,omitempty"`
 	OAuthClientSecret string `json:"oauth_client_secret,omitempty"`

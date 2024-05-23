@@ -57,7 +57,7 @@ func (c *Client) GetSSOCertificates(ctx context.Context, integrationID string) (
 
 type InputCreateSSOCertificate struct {
 	PublicCertificate string `json:"public_certificate,omitempty"`
-	Enabled           bool   `json:"enabled,omitempty"`
+	Enabled           bool   `json:"enabled"`
 	IntegrationID     string `json:"integration_id,omitempty"`
 }
 
@@ -85,7 +85,7 @@ func (c *Client) CreateSSOCertificate(ctx context.Context, input *InputCreateSSO
 
 type InputUpdateSSOCertificate struct {
 	PublicCertificate string `json:"public_certificate,omitempty"`
-	Enabled           bool   `json:"enabled,omitempty"`
+	Enabled           bool   `json:"enabled"`
 	IntegrationID     string `json:"integration_id,omitempty"`
 }
 

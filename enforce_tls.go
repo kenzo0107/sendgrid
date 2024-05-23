@@ -26,8 +26,8 @@ func (c *Client) GetEnforceTLS(ctx context.Context) (*OutputGetEnforceTLS, error
 }
 
 type InputUpdateEnforceTLS struct {
-	RequireTLS       bool    `json:"require_tls,omitempty"`
-	RequireValidCert bool    `json:"require_valid_cert,omitempty"`
+	RequireTLS       bool    `json:"require_tls"`
+	RequireValidCert bool    `json:"require_valid_cert"`
 	Version          float64 `json:"version,omitempty"`
 }
 

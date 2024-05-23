@@ -132,7 +132,7 @@ func (c *Client) GetSubuserBrandedLink(ctx context.Context, subuser string) (*Ou
 type InputCreateBrandedLink struct {
 	Domain    string `json:"domain,omitempty"`
 	Subdomain string `json:"subdomain,omitempty"`
-	Default   bool   `json:"default,omitempty"`
+	Default   bool   `json:"default"`
 }
 
 type OutputCreateBrandedLink struct {
