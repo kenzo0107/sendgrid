@@ -102,18 +102,20 @@ func checkStatusCode(resp *http.Response, d debug) error {
 		return err
 	}
 
+	// {"errors": [{"field": "field name", "message": "error message"}]}
+	errorsResponse := new(ErrorsResponse)
+	if err := newJSONParser(errorsResponse)(resp); err == nil {
+		if errorsResponse.Errs() != nil {
+			return errorsResponse.Errs()
+		}
+	}
+
 	// {"error": "error message"}
 	errorResponse := new(ErrorResponse)
 	if err := newJSONParser(errorResponse)(resp); err == nil {
 		if errorResponse.Err() != nil {
 			return errorResponse.Err()
 		}
-	}
-
-	// {"errors": [{"field": "field name", "message": "error message"}]}
-	errorsResponse := new(ErrorsResponse)
-	if err := newJSONParser(errorsResponse)(resp); err == nil {
-		return errorsResponse.Errs()
 	}
 	return statusCodeError{Code: resp.StatusCode, Status: resp.Status}
 }
