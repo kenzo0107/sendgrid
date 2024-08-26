@@ -191,3 +191,102 @@ func (c *Client) DeletePendingTeammate(ctx context.Context, token string) error 
 	}
 	return nil
 }
+
+type InputCreateSSOTeammate struct {
+	Email                      string               `json:"email"`
+	FirstName                  string               `json:"first_name"`
+	LastName                   string               `json:"last_name"`
+	IsAdmin                    bool                 `json:"is_admin"`
+	IsSSO                      bool                 `json:"is_sso"`
+	Persona                    string               `json:"persona,omitempty"`
+	Scopes                     []string             `json:"scopes,omitempty"`
+	HasRestrictedSubuserAccess bool                 `json:"has_restricted_subuser_access,omitempty"`
+	SubuserAccess              []InputSubuserAccess `json:"subuser_access,omitempty"`
+}
+
+type InputSubuserAccess struct {
+	ID             int64    `json:"id,omitempty"`
+	PermissionType string   `json:"permission_type,omitempty"`
+	Scopes         []string `json:"scopes,omitempty"`
+}
+
+type OutputCreateSSOTeammate struct {
+	FirstName                  string                `json:"first_name,omitempty"`
+	LastName                   string                `json:"last_name,omitempty"`
+	Email                      string                `json:"email,omitempty"`
+	IsAdmin                    bool                  `json:"is_admin,omitempty"`
+	IsSSO                      bool                  `json:"is_sso,omitempty"`
+	Scopes                     []string              `json:"scopes,omitempty"`
+	HasRestrictedSubuserAccess bool                  `json:"has_restricted_subuser_access,omitempty"`
+	SubuserAccess              []OutputSubuserAccess `json:"subuser_access,omitempty"`
+}
+
+type OutputSubuserAccess struct {
+	ID             int64    `json:"id,omitempty"`
+	Username       int64    `json:"username,omitempty"`
+	Email          string   `json:"email,omitempty"`
+	Disabled       bool     `json:"disabled,omitempty"`
+	PermissionType string   `json:"permission_type,omitempty"`
+	Scopes         []string `json:"scopes,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/single-sign-on-teammates/create-sso-teammate
+func (c *Client) CreateSSOTeammate(ctx context.Context, input *InputCreateSSOTeammate) (*OutputCreateSSOTeammate, error) {
+	req, err := c.NewRequest("POST", "/sso/teammates", input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputCreateSSOTeammate)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+type InputUpdateSSOTeammate struct {
+	FirstName                  string               `json:"first_name"`
+	LastName                   string               `json:"last_name"`
+	IsAdmin                    bool                 `json:"is_admin"`
+	Persona                    string               `json:"persona,omitempty"`
+	Scopes                     []string             `json:"scopes,omitempty"`
+	HasRestrictedSubuserAccess bool                 `json:"has_restricted_subuser_access,omitempty"`
+	SubuserAccess              []InputSubuserAccess `json:"subuser_access,omitempty"`
+}
+
+type OutputUpdateSSOTeammate struct {
+	Address                    string                `json:"address,omitempty"`
+	Address2                   string                `json:"address2,omitempty"`
+	City                       string                `json:"city,omitempty"`
+	Company                    string                `json:"company,omitempty"`
+	Country                    string                `json:"country,omitempty"`
+	Username                   string                `json:"username,omitempty"`
+	Phone                      string                `json:"phone,omitempty"`
+	State                      string                `json:"state,omitempty"`
+	UserType                   string                `json:"user_type,omitempty"`
+	Website                    string                `json:"website,omitempty"`
+	Zip                        string                `json:"zip,omitempty"`
+	FirstName                  string                `json:"first_name,omitempty"`
+	LastName                   string                `json:"last_name,omitempty"`
+	Email                      string                `json:"email,omitempty"`
+	IsAdmin                    bool                  `json:"is_admin,omitempty"`
+	IsSSO                      bool                  `json:"is_sso,omitempty"`
+	Scopes                     []string              `json:"scopes,omitempty"`
+	HasRestrictedSubuserAccess bool                  `json:"has_restricted_subuser_access,omitempty"`
+	SubuserAccess              []OutputSubuserAccess `json:"subuser_access,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/single-sign-on-teammates/edit-an-sso-teammate
+func (c *Client) UpdateSSOTeammate(ctx context.Context, username string, input *InputUpdateSSOTeammate) (*OutputUpdateSSOTeammate, error) {
+	u := fmt.Sprintf("/sso/teammates/%s", username)
+	req, err := c.NewRequest("PATCH", u, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputUpdateSSOTeammate)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
