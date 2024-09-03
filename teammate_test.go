@@ -411,3 +411,150 @@ func TestDeletePendingTeammate_Failed(t *testing.T) {
 		t.Fatal("expected an error but got none")
 	}
 }
+
+func TestCreateSSOTeammate(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/teammates", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"first_name": "dummy_first_name",
+			"last_name": "dummy_last_name",
+			"email": "dummy@example.com",
+			"is_admin": false,
+			"is_sso": true,
+			"persona": "",
+			"scopes": [
+				"user.profile.read",
+				"user.profile.update"
+			],
+			"has_restricted_subuser_access": false
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateSSOTeammate(context.TODO(), &InputCreateSSOTeammate{
+		Email:     "dummy@example.com",
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	})
+	if err != nil {
+		t.Fatal("expected an error but got none")
+	}
+
+	want := &OutputCreateSSOTeammate{
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		Email:     "dummy@example.com",
+		IsAdmin:   false,
+		IsSSO:     true,
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+		HasRestrictedSubuserAccess: false,
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestCreateSSOTeammate_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/teammates", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.CreateSSOTeammate(context.TODO(), &InputCreateSSOTeammate{
+		Email:     "dummy@example.com",
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateSSOTeammate(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"first_name": "dummy_first_name",
+			"last_name": "dummy_last_name",
+			"email": "dummy@example.com",
+			"is_admin": false,
+			"is_sso": true,
+			"persona": "",
+			"scopes": [
+				"user.profile.read",
+				"user.profile.update"
+			],
+			"has_restricted_subuser_access": false
+				}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.UpdateSSOTeammate(context.TODO(), "dummy", &InputUpdateSSOTeammate{
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		IsAdmin:   false,
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	})
+	if err != nil {
+		t.Fatal("expected an error but got none")
+	}
+
+	want := &OutputUpdateSSOTeammate{
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		Email:     "dummy@example.com",
+		IsAdmin:   false,
+		IsSSO:     true,
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestUpdateSSOTeammate_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/sso/teammates/dummy", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.UpdateSSOTeammate(context.TODO(), "dummy", &InputUpdateSSOTeammate{
+		FirstName: "dummy_first_name",
+		LastName:  "dummy_last_name",
+		IsAdmin:   false,
+		Scopes: []string{
+			"user.profile.read",
+			"user.profile.update",
+		},
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
