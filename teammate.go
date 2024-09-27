@@ -5,6 +5,15 @@ import (
 	"fmt"
 )
 
+// consolidating normal teammate and SSO teammate fields
+type Member struct {
+	Teammate
+
+	Company string   `json:"company,omitempty"`
+	IsSSO   bool     `json:"is_sso,omitempty"`
+	Scopes  []string `json:"scopes,omitempty"`
+}
+
 type OutputGetTeammate struct {
 	Username  string   `json:"username,omitempty"`
 	FirstName string   `json:"first_name,omitempty"`
