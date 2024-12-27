@@ -215,11 +215,12 @@ type OutputGetTeammateSubuserAccess struct {
 }
 
 type SubuserAccess struct {
-	ID             int64  `json:"id,omitempty"`
-	Username       string `json:"username,omitempty"`
-	Email          string `json:"email,omitempty"`
-	Disabled       bool   `json:"disabled,omitempty"`
-	PermissionType string `json:"permission_type,omitempty"`
+	ID             int64    `json:"id,omitempty"`
+	Username       string   `json:"username,omitempty"`
+	Email          string   `json:"email,omitempty"`
+	Disabled       bool     `json:"disabled,omitempty"`
+	PermissionType string   `json:"permission_type,omitempty"`
+	Scopes         []string `json:"scopes,omitempty"`
 }
 
 type MetadataGetTeammateSubuserAccess struct {
