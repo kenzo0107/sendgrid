@@ -1,6 +1,6 @@
 module github.com/kenzo0107/sendgrid
 
-go 1.22.3
+go 1.23.4
 
 require (
 	github.com/google/go-querystring v1.1.0
