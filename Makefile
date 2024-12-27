@@ -34,7 +34,7 @@ cov:
 
 ## Install linter tool
 install_linter:
-	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.53.3
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2
 .PHONY: install_linter
 
 ## Lint
