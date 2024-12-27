@@ -412,6 +412,75 @@ func TestDeletePendingTeammate_Failed(t *testing.T) {
 	}
 }
 
+func TestGetTeammateSubuserAccess(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/teammates/dummy/subuser_access", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		q.Set("after_subuser_id", "1000000")
+		q.Set("limit", "1")
+		q.Set("username", "subuser-dummy")
+		r.URL.RawQuery = q.Encode()
+
+		if _, err := fmt.Fprint(w, `{
+			"has_restricted_subuser_access": false,
+			"subuser_access": [{
+				"id": 12345678,
+				"username": "subuser-dummy",
+				"email": "subuser-dummy@example.com",
+				"disabled": false,
+				"permission_type": "admin",
+				"scopes": []
+			}]
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetTeammateSubuserAccess(context.TODO(), "dummy", &InputGetTeammateSubuserAccess{
+		AfterSubuserID: 1000000,
+		Limit:          1,
+		Username:       "subuser-dummy",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %v", err)
+		return
+	}
+
+	want := &OutputGetTeammateSubuserAccess{
+		HasRestrictedSubuserAccess: false,
+		SubuserAccess: []SubuserAccess{
+			{
+				ID:             12345678,
+				Username:       "subuser-dummy",
+				Email:          "subuser-dummy@example.com",
+				Disabled:       false,
+				PermissionType: "admin",
+				Scopes:         []string{},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetTeammateSubuserAccess_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/teammates/dummy/subuser_access", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetTeammateSubuserAccess(context.TODO(), "dummy", &InputGetTeammateSubuserAccess{})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestCreateSSOTeammate(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()

@@ -3,6 +3,8 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strconv"
 )
 
 // consolidating normal teammate and SSO teammate fields
@@ -199,6 +201,67 @@ func (c *Client) DeletePendingTeammate(ctx context.Context, token string) error 
 		return err
 	}
 	return nil
+}
+
+type InputGetTeammateSubuserAccess struct {
+	AfterSubuserID int64  `json:"after_subuser_id,omitempty"`
+	Limit          int64  `json:"limit,omitempty"`
+	Username       string `json:"username,omitempty"`
+}
+type OutputGetTeammateSubuserAccess struct {
+	HasRestrictedSubuserAccess bool                             `json:"has_restricted_subuser_access,omitempty"`
+	SubuserAccess              []SubuserAccess                  `json:"subuser_access,omitempty"`
+	Metadata                   MetadataGetTeammateSubuserAccess `json:"_metadata,omitempty"`
+}
+
+type SubuserAccess struct {
+	ID             int64    `json:"id,omitempty"`
+	Username       string   `json:"username,omitempty"`
+	Email          string   `json:"email,omitempty"`
+	Disabled       bool     `json:"disabled,omitempty"`
+	PermissionType string   `json:"permission_type,omitempty"`
+	Scopes         []string `json:"scopes,omitempty"`
+}
+
+type MetadataGetTeammateSubuserAccess struct {
+	NextParams NextParams `json:"next_params,omitempty"`
+}
+
+type NextParams struct {
+	Limit          int64  `json:"limit"`
+	AfterSubuserID int64  `json:"after_subuser_id,omitempty"`
+	Username       string `json:"username,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/teammates/get-teammate-subuser-access
+func (c *Client) GetTeammateSubuserAccess(ctx context.Context, teammateName string, input *InputGetTeammateSubuserAccess) (*OutputGetTeammateSubuserAccess, error) {
+	p := fmt.Sprintf("/teammates/%s/subuser_access", teammateName)
+	u, err := url.Parse(p)
+	if err != nil {
+		return nil, err
+	}
+	q := u.Query()
+	if input.AfterSubuserID > 0 {
+		q.Set("after_subuser_id", strconv.FormatInt(input.AfterSubuserID, 10))
+	}
+	if input.Limit > 0 {
+		q.Set("limit", strconv.FormatInt(input.Limit, 10))
+	}
+	if input.Username != "" {
+		q.Set("username", input.Username)
+	}
+
+	req, err := c.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputGetTeammateSubuserAccess)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 type InputCreateSSOTeammate struct {
