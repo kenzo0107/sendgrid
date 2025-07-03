@@ -201,6 +201,28 @@ func TestGetCategoryStats(t *testing.T) {
 	assert.Equal(t, "category", stats[0].Stats[0].Type)
 }
 
+func TestGetCategoryStats_WithOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/categories/stats", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "newsletter", r.URL.Query().Get("categories"))
+		assert.Equal(t, "2025-01-01", r.URL.Query().Get("start_date"))
+		assert.Equal(t, "2025-01-31", r.URL.Query().Get("end_date"))
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	categories := []string{"newsletter"}
+	opts := &StatsOptions{
+		StartDate: "2025-01-01",
+		EndDate:   "2025-01-31",
+	}
+	_, err := client.GetCategoryStats(context.TODO(), categories, opts)
+	assert.NoError(t, err)
+}
+
 func TestGetCategoryStats_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -245,6 +267,26 @@ func TestGetCategorySums(t *testing.T) {
 	assert.Equal(t, "2025-01-01", stats[0].Date)
 	assert.Len(t, stats[0].Stats, 1)
 	assert.Equal(t, "newsletter", stats[0].Stats[0].Name)
+}
+
+func TestGetCategorySums_WithOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/categories/stats/sums", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "2025-01-01", r.URL.Query().Get("start_date"))
+		assert.Equal(t, "day", r.URL.Query().Get("aggregated_by"))
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	opts := &StatsOptions{
+		StartDate:   "2025-01-01",
+		Aggregation: "day",
+	}
+	_, err := client.GetCategorySums(context.TODO(), opts)
+	assert.NoError(t, err)
 }
 
 func TestGetCategorySums_Failed(t *testing.T) {
@@ -295,6 +337,28 @@ func TestGetSubuserStats(t *testing.T) {
 	assert.Equal(t, "subuser", stats[0].Stats[0].Type)
 }
 
+func TestGetSubuserStats_WithOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/stats", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "subuser1", r.URL.Query().Get("subusers"))
+		assert.Equal(t, "2025-01-01", r.URL.Query().Get("start_date"))
+		assert.Equal(t, "2025-01-31", r.URL.Query().Get("end_date"))
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	subusers := []string{"subuser1"}
+	opts := &StatsOptions{
+		StartDate: "2025-01-01",
+		EndDate:   "2025-01-31",
+	}
+	_, err := client.GetSubuserStats(context.TODO(), subusers, opts)
+	assert.NoError(t, err)
+}
+
 func TestGetSubuserStats_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -341,6 +405,26 @@ func TestGetSubuserSums(t *testing.T) {
 	assert.Equal(t, "subuser1", stats[0].Stats[0].Name)
 }
 
+func TestGetSubuserSums_WithOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/stats/sums", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "2025-01-01", r.URL.Query().Get("start_date"))
+		assert.Equal(t, "day", r.URL.Query().Get("aggregated_by"))
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	opts := &StatsOptions{
+		StartDate:   "2025-01-01",
+		Aggregation: "day",
+	}
+	_, err := client.GetSubuserSums(context.TODO(), opts)
+	assert.NoError(t, err)
+}
+
 func TestGetSubuserSums_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -385,6 +469,26 @@ func TestGetSubuserMonthlyStats(t *testing.T) {
 	assert.Len(t, stats[0].Stats, 1)
 	assert.Equal(t, "subuser1", stats[0].Stats[0].Name)
 	assert.Equal(t, 30000, stats[0].Stats[0].Metrics.Delivered)
+}
+
+func TestGetSubuserMonthlyStats_WithOptions(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/stats/monthly", func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "2025-01-01", r.URL.Query().Get("start_date"))
+		assert.Equal(t, "day", r.URL.Query().Get("aggregated_by"))
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	opts := &StatsOptions{
+		StartDate:   "2025-01-01",
+		Aggregation: "day",
+	}
+	_, err := client.GetSubuserMonthlyStats(context.TODO(), opts)
+	assert.NoError(t, err)
 }
 
 func TestGetSubuserMonthlyStats_Failed(t *testing.T) {

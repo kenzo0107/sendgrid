@@ -40,6 +40,10 @@ type Option func(*Client)
 // OptionBaseURL - provide a custom base url to the sendgrid client.
 func OptionBaseURL(endpoint string) func(*Client) {
 	baseURL, _ := url.Parse(endpoint)
+	// Ensure the base URL always ends with /v3
+	if !strings.HasSuffix(baseURL.Path, "/v3") {
+		baseURL.Path = strings.TrimSuffix(baseURL.Path, "/") + "/v3"
+	}
 	return func(c *Client) {
 		c.baseURL = baseURL
 	}
@@ -126,11 +130,7 @@ func String(v string) *string { return &v }
 // specified, the value pointed to by body is JSON encoded and included as the
 // request body.
 func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-	if strings.HasSuffix(c.baseURL.Path, "/") {
-		return nil, fmt.Errorf("baseURL must not have a trailing slash, but %q does", c.baseURL)
-	}
-
-	u, err := c.baseURL.Parse(c.baseURL.Path + urlStr)
+	u, err := c.baseURL.Parse(urlStr)
 	if err != nil {
 		return nil, err
 	}
