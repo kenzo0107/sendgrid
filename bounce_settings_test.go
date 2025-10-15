@@ -4,116 +4,160 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
+	"reflect"
+	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/kylelemons/godebug/pretty"
+	"github.com/pkg/errors"
 )
 
-func TestClient_GetBounceSettings(t *testing.T) {
-	tt := []struct {
-		name       string
-		statusCode int
-		response   string
-		expected   *BounceSettings
-		expectErr  bool
-	}{
-		{
-			name:       "success",
-			statusCode: http.StatusOK,
-			response:   `{"soft_bounces": 7}`,
-			expected: &BounceSettings{
-				SoftBouncePurgeDays: 7,
-			},
-			expectErr: false,
-		},
-		{
-			name:       "not found - return default",
-			statusCode: http.StatusNotFound,
-			response:   `{}`,
-			expected: &BounceSettings{
-				SoftBouncePurgeDays: 7,
-			},
-			expectErr: false,
-		},
+func TestGetBounceSettings(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, `{
+			"enabled": true,
+			"soft_bounces": 100,
+			"hard_bounces": 200
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetBounceSettings(context.TODO())
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
 	}
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			client, mux, _, teardown := setup()
-			defer teardown()
+	want := &OutputGetBounceSettings{
+		Enabled:     true,
+		SoftBounces: 100,
+		HardBounces: 200,
+	}
 
-			mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, http.MethodGet, r.Method)
-				w.WriteHeader(tc.statusCode)
-				fmt.Fprint(w, tc.response)
-			})
-
-			got, err := client.GetBounceSettings(context.Background())
-			if tc.expectErr {
-				assert.Error(t, err)
-				return
-			}
-
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, got)
-		})
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
 	}
 }
 
-func TestClient_UpdateBounceSettings(t *testing.T) {
-	tt := []struct {
-		name       string
-		input      *InputUpdateBounceSettings
-		statusCode int
-		response   string
-		expected   *BounceSettings
-		expectErr  bool
-	}{
-		{
-			name: "success",
-			input: &InputUpdateBounceSettings{
-				SoftBouncePurgeDays: 14,
-			},
-			statusCode: http.StatusOK,
-			response:   `{"soft_bounces": 14}`,
-			expected: &BounceSettings{
-				SoftBouncePurgeDays: 14,
-			},
-			expectErr: false,
-		},
-		{
-			name: "not found - return input",
-			input: &InputUpdateBounceSettings{
-				SoftBouncePurgeDays: 30,
-			},
-			statusCode: http.StatusNotFound,
-			response:   `{}`,
-			expected: &BounceSettings{
-				SoftBouncePurgeDays: 30,
-			},
-			expectErr: false,
-		},
+func TestGetBounceSettings_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetBounceSettings(context.TODO())
+	if err == nil {
+		t.Fatal("expected an error but got nil")
+	}
+}
+
+func TestUpdateBounceSettings(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PATCH")
+		if _, err := fmt.Fprint(w, `{
+			"enabled": true,
+			"soft_bounces": 150,
+			"hard_bounces": 250
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &InputUpdateBounceSettings{
+		Enabled:     true,
+		SoftBounces: 150,
+		HardBounces: 250,
 	}
 
-	for _, tc := range tt {
-		t.Run(tc.name, func(t *testing.T) {
-			client, mux, _, teardown := setup()
-			defer teardown()
-
-			mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
-				assert.Equal(t, http.MethodPatch, r.Method)
-				w.WriteHeader(tc.statusCode)
-				fmt.Fprint(w, tc.response)
-			})
-
-			got, err := client.UpdateBounceSettings(context.Background(), tc.input)
-			if tc.expectErr {
-				assert.Error(t, err)
-				return
-			}
-
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, got)
-		})
+	expected, err := client.UpdateBounceSettings(context.TODO(), input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
 	}
+
+	want := &OutputUpdateBounceSettings{
+		Enabled:     true,
+		SoftBounces: 150,
+		HardBounces: 250,
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestUpdateBounceSettings_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/mail_settings/bounce_purge", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	input := &InputUpdateBounceSettings{
+		Enabled:     true,
+		SoftBounces: 150,
+		HardBounces: 250,
+	}
+
+	_, err := client.UpdateBounceSettings(context.TODO(), input)
+	if err == nil {
+		t.Fatal("expected an error but got nil")
+	}
+}
+
+// NewRequest Error Tests
+func TestGetBounceSettings_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetBounceSettings(context.TODO())
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestUpdateBounceSettings_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	input := &InputUpdateBounceSettings{
+		Enabled:     true,
+		SoftBounces: 150,
+		HardBounces: 250,
+	}
+
+	_, err := client.UpdateBounceSettings(context.TODO(), input)
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
 }
