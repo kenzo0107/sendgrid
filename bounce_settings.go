@@ -2,54 +2,53 @@ package sendgrid
 
 import (
 	"context"
+	"log"
 )
 
-const (
-	bounceSettingsPath = "/mail_settings/bounce_purge"
-)
-
-// BounceSettings represents the bounce settings for an account
-type BounceSettings struct {
-	SoftBouncePurgeDays int64 `json:"soft_bounces"`
+type OutputGetBounceSettings struct {
+	Enabled     bool  `json:"enabled,omitempty"`
+	SoftBounces int64 `json:"soft_bounces,omitempty"`
+	HardBounces int64 `json:"hard_bounces,omitempty"`
 }
 
-// InputUpdateBounceSettings represents the input for updating bounce settings
-type InputUpdateBounceSettings struct {
-	SoftBouncePurgeDays int64 `json:"soft_bounces,omitempty"`
-}
-
-// GetBounceSettings retrieves the current bounce settings
-func (c *Client) GetBounceSettings(ctx context.Context) (*BounceSettings, error) {
-	req, err := c.NewRequest("GET", bounceSettingsPath, nil)
+// see: https://docs.sendgrid.com/api-reference/bounces/remove-bounces
+func (c *Client) GetBounceSettings(ctx context.Context) (*OutputGetBounceSettings, error) {
+	req, err := c.NewRequest("GET", "/mail_settings/bounce_purge", nil)
 	if err != nil {
 		return nil, err
 	}
 
-	var o BounceSettings
+	var o OutputGetBounceSettings
 	if err := c.Do(ctx, req, &o); err != nil {
-		// If the endpoint doesn't exist or returns an error, return default values
-		return &BounceSettings{
-			SoftBouncePurgeDays: 7, // Default to 7 days
-		}, nil
+		return nil, err
 	}
 
 	return &o, nil
 }
 
-// UpdateBounceSettings updates the bounce settings
-func (c *Client) UpdateBounceSettings(ctx context.Context, input *InputUpdateBounceSettings) (*BounceSettings, error) {
-	req, err := c.NewRequest("PATCH", bounceSettingsPath, input)
+type InputUpdateBounceSettings struct {
+	Enabled     bool  `json:"enabled"`
+	SoftBounces int64 `json:"soft_bounces,omitempty"`
+	HardBounces int64 `json:"hard_bounces,omitempty"`
+}
+
+type OutputUpdateBounceSettings struct {
+	Enabled     bool  `json:"enabled,omitempty"`
+	SoftBounces int64 `json:"soft_bounces,omitempty"`
+	HardBounces int64 `json:"hard_bounces,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/settings-mail/update-bounce-purge-mail-settings
+func (c *Client) UpdateBounceSettings(ctx context.Context, input *InputUpdateBounceSettings) (*OutputUpdateBounceSettings, error) {
+	log.Printf("input: %#v", input)
+	req, err := c.NewRequest("PATCH", "/mail_settings/bounce_purge", input)
 	if err != nil {
 		return nil, err
 	}
 
-	var o BounceSettings
+	var o OutputUpdateBounceSettings
 	if err := c.Do(ctx, req, &o); err != nil {
-		// If the endpoint doesn't exist, return the input as if it was set
-		return &BounceSettings{
-			SoftBouncePurgeDays: input.SoftBouncePurgeDays,
-		}, nil
+		return nil, err
 	}
-
 	return &o, nil
 }
