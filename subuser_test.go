@@ -10,6 +10,54 @@ import (
 	"testing"
 )
 
+func TestGetSubuser(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/testuser", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, `{
+			"id": 12345,
+			"username": "testuser",
+			"email": "testuser@example.com",
+			"disabled": false
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetSubuser(context.TODO(), "testuser")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &Subuser{
+		ID:       12345,
+		Username: "testuser",
+		Email:    "testuser@example.com",
+		Disabled: false,
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetSubuser_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/testuser", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetSubuser(context.TODO(), "testuser")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
 func TestGetSubusers(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -258,6 +306,25 @@ func TestDeleteSubuser_Failed(t *testing.T) {
 }
 
 // NewRequest Error Tests
+func TestGetSubuser_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetSubuser(context.TODO(), "testuser")
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
 func TestGetSubusers_NewRequestError(t *testing.T) {
 	client, _, _, teardown := setup()
 	defer teardown()
