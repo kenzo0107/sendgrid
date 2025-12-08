@@ -20,7 +20,8 @@ func TestGetSubuser(t *testing.T) {
 			"id": 12345,
 			"username": "testuser",
 			"email": "testuser@example.com",
-			"disabled": false
+			"disabled": false,
+			"region": "global"
 		}`); err != nil {
 			t.Fatal(err)
 		}
@@ -37,6 +38,7 @@ func TestGetSubuser(t *testing.T) {
 		Username: "testuser",
 		Email:    "testuser@example.com",
 		Disabled: false,
+		Region:   "global",
 	}
 
 	if !reflect.DeepEqual(want, expected) {
@@ -63,11 +65,26 @@ func TestGetSubusers(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/subusers", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		// クエリパラメータの検証
+		query := r.URL.Query()
+		if query.Get("username") != "dummy" {
+			t.Errorf("Expected username=dummy, got %s", query.Get("username"))
+		}
+		if query.Get("limit") != "1" {
+			t.Errorf("Expected limit=1, got %s", query.Get("limit"))
+		}
+		if query.Get("offset") != "1" {
+			t.Errorf("Expected offset=1, got %s", query.Get("offset"))
+		}
+
 		if _, err := fmt.Fprint(w, `[{
 			"id":12345678,
 			"username":"dummy",
 			"email":"dummy@example.com",
-			"disabled": false
+			"disabled": false,
+			"region": "global"
 		}]`); err != nil {
 			t.Fatal(err)
 		}
@@ -89,6 +106,7 @@ func TestGetSubusers(t *testing.T) {
 			Username: "dummy",
 			Email:    "dummy@example.com",
 			Disabled: false,
+			Region:   "global",
 		},
 	}
 	if !reflect.DeepEqual(want, expected) {
@@ -107,6 +125,160 @@ func TestGetSubusers_Failed(t *testing.T) {
 	_, err := client.GetSubusers(context.TODO(), &InputGetSubusers{})
 	if err == nil {
 		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetSubusers_WithRegionFilter(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		// クエリパラメータの検証
+		query := r.URL.Query()
+		if query.Get("region") != "eu" {
+			t.Errorf("Expected region=eu, got %s", query.Get("region"))
+		}
+
+		if _, err := fmt.Fprint(w, `[{
+			"id":11111111,
+			"username":"eu-user",
+			"email":"euuser@example.com",
+			"disabled": false,
+			"region": "eu"
+		}]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetSubusers(context.TODO(), &InputGetSubusers{
+		Region: "eu",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*Subuser{
+		{
+			ID:       11111111,
+			Username: "eu-user",
+			Email:    "euuser@example.com",
+			Disabled: false,
+			Region:   "eu",
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetSubusers_WithIncludeRegion(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		// クエリパラメータの検証
+		query := r.URL.Query()
+		if query.Get("include_region") != "true" {
+			t.Errorf("Expected include_region=true, got %s", query.Get("include_region"))
+		}
+
+		if _, err := fmt.Fprint(w, `[{
+			"id":22222222,
+			"username":"global-user",
+			"email":"globaluser@example.com",
+			"disabled": false,
+			"region": "global"
+		}]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetSubusers(context.TODO(), &InputGetSubusers{
+		IncludeRegion: true,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*Subuser{
+		{
+			ID:       22222222,
+			Username: "global-user",
+			Email:    "globaluser@example.com",
+			Disabled: false,
+			Region:   "global",
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetSubusers_WithAllParameters(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+
+		// 全てのクエリパラメータの検証
+		query := r.URL.Query()
+		if query.Get("username") != "test-user" {
+			t.Errorf("Expected username=test-user, got %s", query.Get("username"))
+		}
+		if query.Get("limit") != "10" {
+			t.Errorf("Expected limit=10, got %s", query.Get("limit"))
+		}
+		if query.Get("offset") != "5" {
+			t.Errorf("Expected offset=5, got %s", query.Get("offset"))
+		}
+		if query.Get("region") != "us" {
+			t.Errorf("Expected region=us, got %s", query.Get("region"))
+		}
+		if query.Get("include_region") != "true" {
+			t.Errorf("Expected include_region=true, got %s", query.Get("include_region"))
+		}
+
+		if _, err := fmt.Fprint(w, `[{
+			"id":33333333,
+			"username":"test-user",
+			"email":"testuser@example.com",
+			"disabled": false,
+			"region": "us"
+		}]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetSubusers(context.TODO(), &InputGetSubusers{
+		Username:      "test-user",
+		Limit:         10,
+		Offset:        5,
+		Region:        "us",
+		IncludeRegion: true,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*Subuser{
+		{
+			ID:       33333333,
+			Username: "test-user",
+			Email:    "testuser@example.com",
+			Disabled: false,
+			Region:   "us",
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
 	}
 }
 
@@ -169,17 +341,20 @@ func TestCreateSubuser(t *testing.T) {
 			"username":"dummy",
 			"user_id":12345678,
 			"email":"dummy3@example.com",
-			"credit_allocation":{"type":"unlimited"}
+			"credit_allocation":{"type":"unlimited"},
+			"region":"global"
 		}`); err != nil {
 			t.Fatal(err)
 		}
 	})
 
 	expected, err := client.CreateSubuser(context.TODO(), &InputCreateSubuser{
-		Username: "dummy",
-		Email:    "dummy3@example.com",
-		Password: "dummy!123",
-		Ips:      []string{"1.1.1.1"},
+		Username:      "dummy",
+		Email:         "dummy3@example.com",
+		Password:      "dummy!123",
+		Ips:           []string{"1.1.1.1"},
+		Region:        "global",
+		IncludeRegion: true,
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -193,6 +368,50 @@ func TestCreateSubuser(t *testing.T) {
 		CreditAllocation: CreditAllocation{
 			Type: "unlimited",
 		},
+		Region: "global",
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestCreateSubuser_EU_Region(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"username":"eu-user",
+			"user_id":98765432,
+			"email":"euuser@example.com",
+			"credit_allocation":{"type":"unlimited"},
+			"region":"eu"
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateSubuser(context.TODO(), &InputCreateSubuser{
+		Username:      "eu-user",
+		Email:         "euuser@example.com",
+		Password:      "dummy!123",
+		Ips:           []string{"1.1.1.1"},
+		Region:        "eu",
+		IncludeRegion: true,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputCreateSubuser{
+		UserID:   98765432,
+		Username: "eu-user",
+		Email:    "euuser@example.com",
+		CreditAllocation: CreditAllocation{
+			Type: "unlimited",
+		},
+		Region: "eu",
 	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse)
@@ -207,10 +426,12 @@ func TestCreateSubuser_Failed(t *testing.T) {
 		w.WriteHeader(http.StatusInternalServerError)
 	})
 	_, err := client.CreateSubuser(context.TODO(), &InputCreateSubuser{
-		Username: "dummy",
-		Email:    "dummy3@example.com",
-		Password: "dummy!123",
-		Ips:      []string{"1.1.1.1"},
+		Username:      "dummy",
+		Email:         "dummy3@example.com",
+		Password:      "dummy!123",
+		Ips:           []string{"1.1.1.1"},
+		Region:        "global",
+		IncludeRegion: true,
 	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
@@ -376,10 +597,12 @@ func TestCreateSubuser_NewRequestError(t *testing.T) {
 	client.baseURL = invalidURL
 
 	input := &InputCreateSubuser{
-		Username: "testuser",
-		Email:    "test@example.com",
-		Password: "password123",
-		Ips:      []string{"192.168.1.1"},
+		Username:      "testuser",
+		Email:         "test@example.com",
+		Password:      "password123",
+		Ips:           []string{"192.168.1.1"},
+		Region:        "global",
+		IncludeRegion: true,
 	}
 	_, err := client.CreateSubuser(context.TODO(), input)
 	if err == nil {
