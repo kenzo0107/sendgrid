@@ -19,9 +19,10 @@ func handler() error {
 
 	c := sendgrid.New(apiKey, sendgrid.OptionDebug(true))
 	subusers, err := c.GetSubusers(context.TODO(), &sendgrid.InputGetSubusers{
-		Username: "dummy",
-		Limit:    1,
-		Offset:   0,
+		Username:      "dummy.dummy",
+		Limit:         1,
+		Offset:        0,
+		IncludeRegion: true,
 	})
 	if err != nil {
 		return err

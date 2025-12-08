@@ -12,12 +12,7 @@ type Subuser struct {
 	Disabled bool   `json:"disabled,omitempty"`
 	Username string `json:"username,omitempty"`
 	Email    string `json:"email,omitempty"`
-}
-
-type InputGetSubusers struct {
-	Username string
-	Limit    int
-	Offset   int
+	Region   string `json:"region,omitempty"`
 }
 
 // document link not found
@@ -36,6 +31,14 @@ func (c *Client) GetSubuser(ctx context.Context, username string) (*Subuser, err
 	return r, nil
 }
 
+type InputGetSubusers struct {
+	Username      string
+	Limit         int
+	Offset        int
+	Region        string
+	IncludeRegion bool
+}
+
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/list-all-subusers
 func (c *Client) GetSubusers(ctx context.Context, input *InputGetSubusers) ([]*Subuser, error) {
 	u, _ := url.Parse("/subusers")
@@ -49,6 +52,12 @@ func (c *Client) GetSubusers(ctx context.Context, input *InputGetSubusers) ([]*S
 	}
 	if input.Offset > 0 {
 		q.Set("offset", strconv.Itoa(input.Offset))
+	}
+	if input.Region != "" {
+		q.Set("region", input.Region)
+	}
+	if input.IncludeRegion {
+		q.Set("include_region", "true")
 	}
 	u.RawQuery = q.Encode()
 
@@ -87,10 +96,12 @@ func (c *Client) GetSubuserReputations(ctx context.Context, usernames string) ([
 }
 
 type InputCreateSubuser struct {
-	Username string   `json:"username"`
-	Email    string   `json:"email"`
-	Password string   `json:"password"`
-	Ips      []string `json:"ips"`
+	Username      string   `json:"username"`
+	Email         string   `json:"email"`
+	Password      string   `json:"password"`
+	Ips           []string `json:"ips"`
+	Region        string   `json:"region"`
+	IncludeRegion bool     `json:"include_region"`
 }
 
 type OutputCreateSubuser struct {
@@ -100,6 +111,7 @@ type OutputCreateSubuser struct {
 	SignupSessionToken string           `json:"signup_session_token"`
 	AuthorizationToken string           `json:"authorization_token"`
 	CreditAllocation   CreditAllocation `json:"credit_allocation"`
+	Region             string           `json:"region"`
 }
 
 type CreditAllocation struct {
