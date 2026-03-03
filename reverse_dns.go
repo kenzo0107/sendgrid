@@ -105,7 +105,7 @@ type OutputCreateReverseDNS struct {
 
 // see: https://docs.sendgrid.com/api-reference/reverse-dns/set-up-reverse-dns
 func (c *Client) CreateReverseDNS(ctx context.Context, input *InputCreateReverseDNS) (*OutputCreateReverseDNS, error) {
-	req, err := c.NewRequest("GET", "/whitelabel/ips", input)
+	req, err := c.NewRequest("POST", "/whitelabel/ips", input)
 	if err != nil {
 		return nil, err
 	}
