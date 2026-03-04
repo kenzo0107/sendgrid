@@ -3,15 +3,19 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type Design struct {
-	ID           string `json:"id,omitempty"`
-	UpdatedAt    string `json:"updated_at,omitempty"`
-	CreatedAt    string `json:"created_at,omitempty"`
-	ThumbnailURL string `json:"thumbnail_url,omitempty"`
-	Name         string `json:"name,omitempty"`
-	Editor       string `json:"editor,omitempty"`
+	ID                   string   `json:"id,omitempty"`
+	UpdatedAt            string   `json:"updated_at,omitempty"`
+	CreatedAt            string   `json:"created_at,omitempty"`
+	ThumbnailURL         string   `json:"thumbnail_url,omitempty"`
+	Name                 string   `json:"name,omitempty"`
+	Editor               string   `json:"editor,omitempty"`
+	Subject              string   `json:"subject,omitempty"`
+	Categories           []string `json:"categories,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
 }
 
 type _Metadata struct {
@@ -21,14 +25,34 @@ type _Metadata struct {
 	Count int64  `json:"count,omitempty"`
 }
 
+type InputGetDesigns struct {
+	PageSize  int64  `json:"page_size,omitempty"`
+	PageToken string `json:"page_token,omitempty"`
+	Summary   bool   `json:"summary,omitempty"`
+}
+
 type OutputGetDesigns struct {
 	Result   []*Design `json:"result,omitempty"`
 	Metadata _Metadata `json:"_metadata,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/designs-api/list-designs
-func (c *Client) GetDesigns(ctx context.Context) (*OutputGetDesigns, error) {
-	req, err := c.NewRequest("GET", "/designs", nil)
+func (c *Client) GetDesigns(ctx context.Context, input *InputGetDesigns) (*OutputGetDesigns, error) {
+	u, _ := url.Parse("/designs")
+
+	q := u.Query()
+	if input.PageSize > 0 {
+		q.Set("page_size", fmt.Sprintf("%d", input.PageSize))
+	}
+	if input.PageToken != "" {
+		q.Set("page_token", input.PageToken)
+	}
+	if input.Summary {
+		q.Set("summary", "true")
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := c.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -144,6 +168,82 @@ func (c *Client) UpdateDesign(ctx context.Context, id string, input *InputUpdate
 	}
 
 	r := new(OutputUpdateDesign)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+type InputDuplicateDesign struct {
+	Name   string `json:"name,omitempty"`
+	Editor string `json:"editor,omitempty"`
+}
+
+type OutputDuplicateDesign struct {
+	ID                   string   `json:"id,omitempty"`
+	UpdatedAt            string   `json:"updated_at,omitempty"`
+	CreatedAt            string   `json:"created_at,omitempty"`
+	ThumbnailURL         string   `json:"thumbnail_url,omitempty"`
+	Name                 string   `json:"name,omitempty"`
+	Editor               string   `json:"editor,omitempty"`
+	HTMLContent          string   `json:"html_content,omitempty"`
+	PlainContent         string   `json:"plain_content,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
+	Subject              string   `json:"subject,omitempty"`
+	Categories           []string `json:"categories,omitempty"`
+}
+
+// see: https://docs.sendgrid.com/api-reference/designs-api/duplicate-design
+func (c *Client) DuplicateDesign(ctx context.Context, id string, input *InputDuplicateDesign) (*OutputDuplicateDesign, error) {
+	path := fmt.Sprintf("/designs/%s", id)
+
+	req, err := c.NewRequest("POST", path, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputDuplicateDesign)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+type InputGetPreBuiltDesigns struct {
+	PageSize  int64  `json:"page_size,omitempty"`
+	PageToken string `json:"page_token,omitempty"`
+	Summary   bool   `json:"summary,omitempty"`
+}
+
+type OutputGetPreBuiltDesigns struct {
+	Result   []*Design `json:"result,omitempty"`
+	Metadata _Metadata `json:"_metadata,omitempty"`
+}
+
+// see: https://docs.sendgrid.com/api-reference/designs-api/list-sendgrid-pre-built-designs
+func (c *Client) GetPreBuiltDesigns(ctx context.Context, input *InputGetPreBuiltDesigns) (*OutputGetPreBuiltDesigns, error) {
+	u, _ := url.Parse("/designs/pre-builts")
+
+	q := u.Query()
+	if input.PageSize > 0 {
+		q.Set("page_size", fmt.Sprintf("%d", input.PageSize))
+	}
+	if input.PageToken != "" {
+		q.Set("page_token", input.PageToken)
+	}
+	if input.Summary {
+		q.Set("summary", "true")
+	}
+	u.RawQuery = q.Encode()
+
+	req, err := c.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputGetPreBuiltDesigns)
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
