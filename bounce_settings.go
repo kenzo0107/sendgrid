@@ -2,7 +2,6 @@ package sendgrid
 
 import (
 	"context"
-	"log"
 )
 
 type OutputGetBounceSettings struct {
@@ -40,7 +39,6 @@ type OutputUpdateBounceSettings struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/settings-mail/update-bounce-purge-mail-settings
 func (c *Client) UpdateBounceSettings(ctx context.Context, input *InputUpdateBounceSettings) (*OutputUpdateBounceSettings, error) {
-	log.Printf("input: %#v", input)
 	req, err := c.NewRequest("PATCH", "/mail_settings/bounce_purge", input)
 	if err != nil {
 		return nil, err

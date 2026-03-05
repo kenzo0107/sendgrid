@@ -3,7 +3,6 @@ package sendgrid
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -221,8 +220,6 @@ func TestGetScheduledSend(t *testing.T) {
 		BatchID: "test-batch-id",
 		Status:  "cancel",
 	}
-
-	log.Printf("r: %#v", r)
 
 	if !reflect.DeepEqual(want, r) {
 		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, r)))
