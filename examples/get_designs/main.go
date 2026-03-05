@@ -18,7 +18,7 @@ func handler() error {
 	apiKey := os.Getenv("SENDGRID_API_KEY")
 
 	c := sendgrid.New(apiKey, sendgrid.OptionDebug(true))
-	r, err := c.GetDesigns(context.TODO())
+	r, err := c.GetDesigns(context.TODO(), &sendgrid.InputGetDesigns{})
 	if err != nil {
 		return err
 	}
