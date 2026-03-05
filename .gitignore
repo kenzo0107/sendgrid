@@ -23,7 +23,10 @@ go.work
 .env*
 
 dist/
+docs/
 
 # ai-agent
 .claude
+!.claude/skills/sendgrid_api_sync/SKILL.md
 CLAUDE.md
+/scraper
