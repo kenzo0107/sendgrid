@@ -77,7 +77,7 @@ func TestGetIPPool(t *testing.T) {
 
 	mux.HandleFunc("/ips/pools/pool1", func(w http.ResponseWriter, r *http.Request) {
 		if _, err := w.Write([]byte(`{
-			"name":"pool1",
+			"pool_name":"pool1",
 			"ips":[
 				"192.168.0.1",
 				"192.168.0.2"
@@ -95,8 +95,8 @@ func TestGetIPPool(t *testing.T) {
 	}
 
 	want := &OutputGetIPPool{
-		Name: "pool1",
-		IPs:  []string{"192.168.0.1", "192.168.0.2"},
+		PoolName: "pool1",
+		IPs:      []string{"192.168.0.1", "192.168.0.2"},
 	}
 
 	if !reflect.DeepEqual(want, expected) {
