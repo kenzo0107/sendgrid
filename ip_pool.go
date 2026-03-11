@@ -29,8 +29,8 @@ func (c *Client) GetIPPools(ctx context.Context) ([]*IPPool, error) {
 }
 
 type OutputGetIPPool struct {
-	Name string   `json:"name,omitempty"`
-	IPs  []string `json:"ips,omitempty"`
+	PoolName string   `json:"pool_name,omitempty"`
+	IPs      []string `json:"ips,omitempty"`
 }
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-pools/retrieve-all-the-ips-in-a-specified-pool
