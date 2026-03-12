@@ -22,6 +22,10 @@ func handler() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("%#v\n", r)
+	log.Printf("pool name: %#v\n", r.PoolName)
+
+	for _, ip := range r.IPs {
+		log.Printf("%#v\n", ip)
+	}
 	return nil
 }

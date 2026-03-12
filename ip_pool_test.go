@@ -79,8 +79,8 @@ func TestGetIPPool(t *testing.T) {
 		if _, err := w.Write([]byte(`{
 			"pool_name":"pool1",
 			"ips":[
-				"192.168.0.1",
-				"192.168.0.2"
+				{"ip":"192.168.0.1", "warmup":true, "start_date":1700000000},
+				{"ip":"192.168.0.2", "warmup":false, "start_date":1700000000}
 			]
 		}`)); err != nil {
 			assert.Fail(t, "Failed to write response: %v", err)
@@ -96,7 +96,10 @@ func TestGetIPPool(t *testing.T) {
 
 	want := &OutputGetIPPool{
 		PoolName: "pool1",
-		IPs:      []string{"192.168.0.1", "192.168.0.2"},
+		IPs: []*IP{
+			{IP: "192.168.0.1", Warmup: true, StartDate: 1700000000},
+			{IP: "192.168.0.2", Warmup: false, StartDate: 1700000000},
+		},
 	}
 
 	if !reflect.DeepEqual(want, expected) {
