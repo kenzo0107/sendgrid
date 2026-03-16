@@ -23,7 +23,6 @@ go.work
 .env*
 
 dist/
-docs/
 
 # ai-agent
 .claude
