@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type DomainAuthentication struct {
@@ -140,6 +141,20 @@ type OutputGetAuthenticatedDomain struct {
 	AutomaticSecurity bool     `json:"automatic_security,omitempty"`
 	Valid             bool     `json:"valid,omitempty"`
 	DNS               DNS      `json:"dns,omitempty"`
+	Region            string   `json:"region,omitempty"`
+}
+
+func parseRegion(dkimRecord Record) string {
+	host_parts := strings.Split(dkimRecord.Host, ".")
+
+	if strings.Contains(host_parts[0], "eus1") {
+		return "eu"
+	}
+	if strings.Contains(host_parts[0], "s1") {
+		return "global"
+	}
+
+	return "unknown"
 }
 
 func (c *Client) GetAuthenticatedDomain(ctx context.Context, domainId int64) (*OutputGetAuthenticatedDomain, error) {
@@ -154,6 +169,10 @@ func (c *Client) GetAuthenticatedDomain(ctx context.Context, domainId int64) (*O
 		return nil, err
 	}
 
+	// Hack: region is not part of the response
+	// parse dns record set and lookup region
+	r.Region = parseRegion(r.DNS.Dkim1)
+
 	return r, nil
 }
 
@@ -166,6 +185,7 @@ type InputAuthenticateDomain struct {
 	Default            bool     `json:"default,omitempty"`
 	AutomaticSecurity  bool     `json:"automatic_security,omitempty"`
 	CustomDkimSelector string   `json:"custom_dkim_selector,omitempty"`
+	Region             string   `json:"region,omitempty"`
 }
 
 type OutputAuthenticateDomain struct {
@@ -181,6 +201,7 @@ type OutputAuthenticateDomain struct {
 	AutomaticSecurity bool     `json:"automatic_security,omitempty"`
 	Valid             bool     `json:"valid,omitempty"`
 	DNS               DNS      `json:"dns,omitempty"`
+	Region            string   `json:"region,omitempty"`
 }
 
 func (c *Client) AuthenticateDomain(ctx context.Context, input *InputAuthenticateDomain) (*OutputAuthenticateDomain, error) {
@@ -193,6 +214,11 @@ func (c *Client) AuthenticateDomain(ctx context.Context, input *InputAuthenticat
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
+
+	// Hack: region is not part of the response
+	// parse dns record set and lookup region
+	r.Region = parseRegion(r.DNS.Dkim1)
+
 	return r, nil
 }
 
@@ -297,6 +323,7 @@ type OutputUpdateDomainAuthentication struct {
 	AutomaticSecurity       bool                          `json:"automatic_security,omitempty"`
 	Valid                   bool                          `json:"valid,omitempty"`
 	DNS                     DNS                           `json:"dns,omitempty"`
+	Region                  string                        `json:"region,omitempty"`
 	Subusers                []SubuserSenderAuthentication `json:"subusers,omitempty"`
 	LastValidationAttemptAt int64                         `json:"last_validation_attempt_at,omitempty"`
 }
@@ -312,6 +339,11 @@ func (c *Client) UpdateDomainAuthentication(ctx context.Context, domainId int64,
 	if err := c.Do(ctx, req, &r); err != nil {
 		return nil, err
 	}
+
+	// Hack: region is not part of the response
+	// parse dns record set and lookup region
+	r.Region = parseRegion(r.DNS.Dkim1)
+
 	return r, nil
 }
 
@@ -341,6 +373,7 @@ type OutputGetAuthenticatedDomainAssociatedWithSubuser struct {
 	AutomaticSecurity       bool     `json:"automatic_security,omitempty"`
 	Valid                   bool     `json:"valid,omitempty"`
 	DNS                     DNS      `json:"dns,omitempty"`
+	Region                  string   `json:"region,omitempty"`
 	LastValidationAttemptAt int64    `json:"last_validation_attempt_at,omitempty"`
 }
 
@@ -376,6 +409,7 @@ type OutputAssociateAuthenticatedDomainWithSubuser struct {
 	AutomaticSecurity       bool     `json:"automatic_security,omitempty"`
 	Valid                   bool     `json:"valid,omitempty"`
 	DNS                     DNS      `json:"dns,omitempty"`
+	Region                  string   `json:"region,omitempty"`
 	LastValidationAttemptAt int64    `json:"last_validation_attempt_at,omitempty"`
 }
 
