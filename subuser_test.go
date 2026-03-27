@@ -675,3 +675,222 @@ func TestDeleteSubuser_NewRequestError(t *testing.T) {
 
 	client.baseURL = originalBaseURL
 }
+
+func TestGetCreditsForSubuser(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		if _, err := fmt.Fprint(w, `{
+			"type": "recurring",
+			"reset_frequency": "daily",
+			"remain": 500,
+			"total": 1000,
+			"used": 500
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetCreditsForSubuser(context.TODO(), "dummy")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputGetCreditsForSubuser{
+		Type:           "recurring",
+		ResetFrequency: "daily",
+		Remain:         500,
+		Total:          1000,
+		Used:           500,
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestGetCreditsForSubuser_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetCreditsForSubuser(context.TODO(), "dummy")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetCreditsForSubuser_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetCreditsForSubuser(context.TODO(), "dummy")
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestUpdateCreditsForSubuser(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PUT")
+		if _, err := fmt.Fprint(w, `{
+			"type": "recurring",
+			"reset_frequency": "daily",
+			"remain": 500,
+			"total": 1000,
+			"used": 500
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &InputUpdateCreditsForSubuser{
+		Type: "recurring",
+	}
+
+	expected, err := client.UpdateCreditsForSubuser(context.TODO(), "dummy", input)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputUpdateCreditsForSubuser{
+		Type:           "recurring",
+		ResetFrequency: "daily",
+		Remain:         500,
+		Total:          1000,
+		Used:           500,
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestUpdateCreditsForSubuser_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	input := &InputUpdateCreditsForSubuser{
+		Type: "recurring",
+	}
+	_, err := client.UpdateCreditsForSubuser(context.TODO(), "dummy", input)
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateCreditsForSubuser_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	input := &InputUpdateCreditsForSubuser{
+		Type: "recurring",
+	}
+	_, err := client.UpdateCreditsForSubuser(context.TODO(), "dummy", input)
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestUpdateRemainingCreditsForSubuser(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits/remaining", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PATCH")
+		if _, err := fmt.Fprint(w, `{
+			"type": "recurring",
+			"reset_frequency": "daily",
+			"remain": 600,
+			"total": 1000,
+			"used": 400
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.UpdateRemainingCreditsForSubuser(context.TODO(), "dummy", &InputUpdateRemainingCreditsForSubuser{
+		AllocationUpdate: 100,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+	want := &OutputUpdateRemainingCreditsForSubuser{
+		Type:           "recurring",
+		ResetFrequency: "daily",
+		Remain:         600,
+		Total:          1000,
+		Used:           400,
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse)
+	}
+}
+
+func TestUpdateRemainingCreditsForSubuser_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/subusers/dummy/credits/remaining", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.UpdateRemainingCreditsForSubuser(context.TODO(), "dummy", &InputUpdateRemainingCreditsForSubuser{
+		AllocationUpdate: 100,
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateRemainingCreditsForSubuser_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.UpdateRemainingCreditsForSubuser(context.TODO(), "dummy", &InputUpdateRemainingCreditsForSubuser{
+		AllocationUpdate: 100,
+	})
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}

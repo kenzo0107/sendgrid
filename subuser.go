@@ -180,3 +180,85 @@ func (c *Client) DeleteSubuser(ctx context.Context, username string) error {
 	}
 	return nil
 }
+
+type OutputGetCreditsForSubuser struct {
+	Type           string `json:"type,omitempty"`
+	ResetFrequency string `json:"reset_frequency,omitempty"`
+	Remain         int    `json:"remain,omitempty"`
+	Total          int    `json:"total,omitempty"`
+	Used           int    `json:"used,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/get-credits-for-subuser
+func (c *Client) GetCreditsForSubuser(ctx context.Context, username string) (*OutputGetCreditsForSubuser, error) {
+	path := fmt.Sprintf("/subusers/%s/credits", username)
+
+	req, err := c.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputGetCreditsForSubuser)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+type InputUpdateCreditsForSubuser struct {
+	Type           string `json:"type,omitempty"`
+	ResetFrequency string `json:"reset_frequency,omitempty"`
+	Total          int    `json:"total,omitempty"`
+}
+
+type OutputUpdateCreditsForSubuser struct {
+	Type           string `json:"type,omitempty"`
+	ResetFrequency string `json:"reset_frequency,omitempty"`
+	Remain         int    `json:"remain,omitempty"`
+	Total          int    `json:"total,omitempty"`
+	Used           int    `json:"used,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/update-credits-for-subuser
+func (c *Client) UpdateCreditsForSubuser(ctx context.Context, username string, input *InputUpdateCreditsForSubuser) (*OutputUpdateCreditsForSubuser, error) {
+	path := fmt.Sprintf("/subusers/%s/credits", username)
+
+	req, err := c.NewRequest("PUT", path, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputUpdateCreditsForSubuser)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+type InputUpdateRemainingCreditsForSubuser struct {
+	AllocationUpdate int `json:"allocation_update,omitempty"`
+}
+
+type OutputUpdateRemainingCreditsForSubuser struct {
+	Type           string `json:"type,omitempty"`
+	ResetFrequency string `json:"reset_frequency,omitempty"`
+	Remain         int    `json:"remain,omitempty"`
+	Total          int    `json:"total,omitempty"`
+	Used           int    `json:"used,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/update-remaining-credits-for-subuser
+func (c *Client) UpdateRemainingCreditsForSubuser(ctx context.Context, username string, input *InputUpdateRemainingCreditsForSubuser) (*OutputUpdateRemainingCreditsForSubuser, error) {
+	path := fmt.Sprintf("/subusers/%s/credits/remaining", username)
+
+	req, err := c.NewRequest("PATCH", path, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputUpdateRemainingCreditsForSubuser)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
