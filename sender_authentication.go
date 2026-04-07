@@ -105,6 +105,7 @@ type OutputGetDefaultAuthentication struct {
 	LastValidationAttemptAt int64                         `json:"last_validation_attempt_at,omitempty"`
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/get-the-default-authentication
 func (c *Client) GetDefaultAuthentication(ctx context.Context, input *InputGetDefaultAuthentication) (*OutputGetDefaultAuthentication, error) {
 	u, _ := url.Parse("/whitelabel/domains/default")
 
@@ -142,6 +143,7 @@ type OutputGetAuthenticatedDomain struct {
 	DNS               DNS      `json:"dns,omitempty"`
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/retrieve-an-authenticated-domain
 func (c *Client) GetAuthenticatedDomain(ctx context.Context, domainId int64) (*OutputGetAuthenticatedDomain, error) {
 	path := fmt.Sprintf("/whitelabel/domains/%s", strconv.FormatInt(domainId, 10))
 	req, err := c.NewRequest("GET", path, nil)
@@ -166,6 +168,7 @@ type InputAuthenticateDomain struct {
 	Default            bool     `json:"default,omitempty"`
 	AutomaticSecurity  bool     `json:"automatic_security,omitempty"`
 	CustomDkimSelector string   `json:"custom_dkim_selector,omitempty"`
+	Region             string   `json:"region,omitempty"`
 }
 
 type OutputAuthenticateDomain struct {
@@ -183,6 +186,7 @@ type OutputAuthenticateDomain struct {
 	DNS               DNS      `json:"dns,omitempty"`
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/authenticate-a-domain
 func (c *Client) AuthenticateDomain(ctx context.Context, input *InputAuthenticateDomain) (*OutputAuthenticateDomain, error) {
 	req, err := c.NewRequest("POST", "/whitelabel/domains", input)
 	if err != nil {
@@ -217,7 +221,7 @@ type OutputAddIPToAuthenticatedDomain struct {
 }
 
 // NOTE: The 'dns' key in the API response for adding an IP to the authenticated domain is different from what is documented.
-// see: https://docs.sendgrid.com/api-reference/domain-authentication/add-an-ip-to-an-authenticated-domain#responses
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/add-an-ip-to-an-authenticated-domain
 func (c *Client) AddIPToAuthenticatedDomain(ctx context.Context, domainId int64, input *InputAddIPToAuthenticatedDomain) (*OutputAddIPToAuthenticatedDomain, error) {
 	path := fmt.Sprintf("/whitelabel/domains/%s/ips", strconv.FormatInt(domainId, 10))
 	req, err := c.NewRequest("POST", path, input)
@@ -233,7 +237,7 @@ func (c *Client) AddIPToAuthenticatedDomain(ctx context.Context, domainId int64,
 }
 
 // NOTE: The 'dns' key in the API response for removing an IP to the authenticated domain is different from what is documented.
-// see: https://docs.sendgrid.com/api-reference/domain-authentication/remove-an-ip-from-an-authenticated-domain#responses
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/remove-an-ip-from-an-authenticated-domain
 func (c *Client) RemoveIPFromAuthenticatedDomain(ctx context.Context, domainId int64, ip string) error {
 	path := fmt.Sprintf("/whitelabel/domains/%s/ips/%s", strconv.FormatInt(domainId, 10), ip)
 	req, err := c.NewRequest("DELETE", path, nil)
@@ -265,6 +269,7 @@ type ValidationResult struct {
 	Reason string `json:"reason,omitempty"`
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/validate-a-domain-authentication
 func (c *Client) ValidateDomainAuthentication(ctx context.Context, domainId int64) (*OutputValidateDomainAuthentication, error) {
 	path := fmt.Sprintf("/whitelabel/domains/%s/validate", strconv.FormatInt(domainId, 10))
 	req, err := c.NewRequest("POST", path, nil)
@@ -301,6 +306,7 @@ type OutputUpdateDomainAuthentication struct {
 	LastValidationAttemptAt int64                         `json:"last_validation_attempt_at,omitempty"`
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/update-an-authenticated-domain
 func (c *Client) UpdateDomainAuthentication(ctx context.Context, domainId int64, input *InputUpdateDomainAuthentication) (*OutputUpdateDomainAuthentication, error) {
 	path := fmt.Sprintf("/whitelabel/domains/%s", strconv.FormatInt(domainId, 10))
 	req, err := c.NewRequest("PATCH", path, input)
@@ -315,6 +321,7 @@ func (c *Client) UpdateDomainAuthentication(ctx context.Context, domainId int64,
 	return r, nil
 }
 
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/delete-an-authenticated-domain
 func (c *Client) DeleteAuthenticatedDomain(ctx context.Context, domainId int64) error {
 	path := fmt.Sprintf("/whitelabel/domains/%s", strconv.FormatInt(domainId, 10))
 	req, err := c.NewRequest("DELETE", path, nil)
