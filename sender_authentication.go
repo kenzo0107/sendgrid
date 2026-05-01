@@ -166,7 +166,7 @@ type InputAuthenticateDomain struct {
 	IPs                []string `json:"ips,omitempty"`
 	CustomSpf          bool     `json:"custom_spf,omitempty"`
 	Default            bool     `json:"default,omitempty"`
-	AutomaticSecurity  bool     `json:"automatic_security,omitempty"`
+	AutomaticSecurity  bool     `json:"automatic_security"`
 	CustomDkimSelector string   `json:"custom_dkim_selector,omitempty"`
 	Region             string   `json:"region,omitempty"`
 }

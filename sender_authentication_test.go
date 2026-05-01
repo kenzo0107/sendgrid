@@ -2,15 +2,16 @@ package sendgrid
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/kylelemons/godebug/pretty"
 	"github.com/pkg/errors"
-	"net/url"
-	"strings"
 )
 
 func TestGetAuthenticatedDomains(t *testing.T) {
@@ -1088,6 +1089,112 @@ func TestGetAuthenticatedDomain_NewRequestError(t *testing.T) {
 	}
 
 	client.baseURL = originalBaseURL
+}
+
+func TestAuthenticateDomain(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		var reqBody InputAuthenticateDomain
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		// AutomaticSecurity が false でもリクエストボディに含まれることを確認
+		if reqBody.AutomaticSecurity != false {
+			t.Errorf("Expected AutomaticSecurity to be false, got %v", reqBody.AutomaticSecurity)
+		}
+
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"user_id": 9876543,
+			"subdomain": "em1234",
+			"domain": "example.com",
+			"username": "dummy",
+			"ips": [],
+			"custom_spf": false,
+			"default": false,
+			"legacy": false,
+			"automatic_security": false,
+			"valid": false,
+			"dns": {
+				"mail_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "em1234.example.com",
+					"data": "u1234567.wl123.sendgrid.net"
+				},
+				"dkim1": {
+					"valid": false,
+					"type": "cname",
+					"host": "s1._domainkey.example.com",
+					"data": "s1.domainkey.u1234567.wl123.sendgrid.net"
+				},
+				"dkim2": {
+					"valid": false,
+					"type": "cname",
+					"host": "s2._domainkey.example.com",
+					"data": "s2.domainkey.u1234567.wl123.sendgrid.net"
+				}
+			}
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &InputAuthenticateDomain{
+		Domain:            "example.com",
+		Subdomain:         "em1234",
+		AutomaticSecurity: false,
+	}
+	output, err := client.AuthenticateDomain(context.Background(), input)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if output.ID != 1234567 {
+		t.Errorf("Expected ID to be 1234567, got %d", output.ID)
+	}
+	if output.Domain != "example.com" {
+		t.Errorf("Expected Domain to be example.com, got %s", output.Domain)
+	}
+	if output.AutomaticSecurity != false {
+		t.Errorf("Expected AutomaticSecurity to be false, got %v", output.AutomaticSecurity)
+	}
+}
+
+func TestAuthenticateDomain_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := fmt.Fprint(w, `{
+			"errors": [
+				{
+					"message": "invalid domain",
+					"field": "domain",
+					"help": null
+				}
+			]
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	input := &InputAuthenticateDomain{
+		Domain:    "invalid-domain",
+		Subdomain: "em1234",
+	}
+	_, err := client.AuthenticateDomain(context.Background(), input)
+	if err == nil {
+		t.Fatal("Expected error, got nil")
+	}
 }
 
 func TestAuthenticateDomain_NewRequestError(t *testing.T) {
