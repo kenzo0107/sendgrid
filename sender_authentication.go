@@ -28,6 +28,11 @@ type DNS struct {
 	MailCname Record `json:"mail_cname,omitempty"`
 	Dkim1     Record `json:"dkim1,omitempty"`
 	Dkim2     Record `json:"dkim2,omitempty"`
+
+	// automatic_security is true, the API response will contain 'subdomain_spf' instead of 'spf' for the SPF record. If automatic_security is false, the API response will contain 'spf' for the SPF record.
+	MailServer   Record `json:"mail_server,omitempty"`
+	SubdomainSpf Record `json:"subdomain_spf,omitempty"`
+	Dkim         Record `json:"dkim,omitempty"`
 }
 
 type Record struct {
