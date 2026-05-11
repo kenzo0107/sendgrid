@@ -39,6 +39,13 @@ func main() {
 }
 ```
 
+### Using EU Region
+
+```go
+	// When using an EU region
+	c := sendgrid.New(apiKey, sendgrid.OptionBaseURL(sendgrid.BaseURLEU))
+```
+
 ## License
 
 [MIT License](https://github.com/kenzo0107/sendgrid/blob/main/LICENSE)

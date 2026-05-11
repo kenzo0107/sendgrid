@@ -83,6 +83,37 @@ func TestOptionSubuser(t *testing.T) {
 	}
 }
 
+func TestOptionBaseURL_WithRegions(t *testing.T) {
+	tests := []struct {
+		name        string
+		baseURL     string
+		expectedURL string
+	}{
+		{
+			name:        "Global region",
+			baseURL:     BaseURLGlobal,
+			expectedURL: "https://api.sendgrid.com/v3",
+		},
+		{
+			name:        "EU region",
+			baseURL:     BaseURLEU,
+			expectedURL: "https://api.eu.sendgrid.com/v3",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client := New("test-api-key")
+			option := OptionBaseURL(tt.baseURL)
+			option(client)
+
+			if client.baseURL.String() != tt.expectedURL {
+				t.Errorf("Expected baseURL to be '%s', got %s", tt.expectedURL, client.baseURL.String())
+			}
+		})
+	}
+}
+
 func TestOptionHTTPClient(t *testing.T) {
 	client := New("test-api-key")
 	customClient := &http.Client{}

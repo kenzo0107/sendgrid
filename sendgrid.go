@@ -17,7 +17,14 @@ import (
 	"github.com/pkg/errors"
 )
 
-var defaultBaseURL, _ = url.Parse("https://api.sendgrid.com/v3")
+const (
+	// BaseURLGlobal は Global リージョンの base URL です
+	BaseURLGlobal = "https://api.sendgrid.com/v3"
+	// BaseURLEU は EU リージョンの base URL です
+	BaseURLEU = "https://api.eu.sendgrid.com/v3"
+)
+
+var defaultBaseURL, _ = url.Parse(BaseURLGlobal)
 
 // httpClient defines the minimal interface needed for an http.Client to be implemented.
 type httpClient interface {
