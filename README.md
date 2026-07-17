@@ -1,7 +1,6 @@
 # SendGrid API in Go
 
 [![GoDoc](https://godoc.org/github.com/kenzo0107/sendgrid?status.svg)](https://godoc.org/github.com/kenzo0107/sendgrid) [![test](https://github.com/kenzo0107/sendgrid/actions/workflows/test.yml/badge.svg)](https://github.com/kenzo0107/sendgrid/actions/workflows/test.yml) [![lint](https://github.com/kenzo0107/sendgrid/actions/workflows/lint.yml/badge.svg)](https://github.com/kenzo0107/sendgrid/actions/workflows/lint.yml)
-[![codecov](https://codecov.io/gh/kenzo0107/sendgrid/branch/main/graph/badge.svg)](https://codecov.io/gh/kenzo0107/sendgrid)
 
 This library supports most if not all of the [SendGrid](https://sendgrid.com) REST calls.
 
