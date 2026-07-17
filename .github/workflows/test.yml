@@ -17,20 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
 
-      - name: Pick golang version
-        id: go
-        run: echo "version=$(awk '$1 ~ /^golang/{print $2}' .tool-versions)" >> $GITHUB_OUTPUT
-
-      - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
-        with:
-          go-version: ${{ steps.go.outputs.version }}
+      - uses: jdx/mise-action@e6a8b3978addb5a52f2b4cd9d91eafa7f0ab959d # v4.2.0
 
       - run: go test -v -count=1 -race -cover -coverprofile=coverage ./...
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@57e3a136b779b570ffcdbf80b3bdc90e7fab3de2 # v6.0.0
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage
-          flags: unittests
-          name: codecov
-          fail_ci_if_error: true
+      - run: go tool cover -func=coverage
