@@ -18,6 +18,9 @@ func TestGetSSOIntegration(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/sso/integrations/abcdef", func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("si"); got != "true" {
+			t.Errorf("si query = %q, want %q", got, "true")
+		}
 		if _, err := fmt.Fprint(w, `{
 			"id": "abcdef",
 			"name": "dummy",
@@ -77,6 +80,9 @@ func TestGetSSOIntegrations(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/sso/integrations", func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("si"); got != "true" {
+			t.Errorf("si query = %q, want %q", got, "true")
+		}
 		if _, err := fmt.Fprint(w, `[
 			{
 				"id": "abcdef",
@@ -213,6 +219,9 @@ func TestUpdateSSOIntegration(t *testing.T) {
 	defer teardown()
 
 	mux.HandleFunc("/sso/integrations/abcdef", func(w http.ResponseWriter, r *http.Request) {
+		if got := r.URL.Query().Get("si"); got != "true" {
+			t.Errorf("si query = %q, want %q", got, "true")
+		}
 		if _, err := fmt.Fprint(w, `{
 			"id": "abcdef",
 			"name": "dummy",
