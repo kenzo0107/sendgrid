@@ -1380,3 +1380,369 @@ func TestDisassociateAuthenticatedDomainFromSubuser_NewRequestError(t *testing.T
 
 	client.baseURL = originalBaseURL
 }
+
+func TestEmailDNSRecordsToCoworker(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/dns/email", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		var reqBody InputEmailDNSRecordsToCoworker
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+
+		if reqBody.Email != "my_colleague@example.com" {
+			t.Errorf("Expected email 'my_colleague@example.com', got %s", reqBody.Email)
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	})
+
+	err := client.EmailDNSRecordsToCoworker(context.TODO(), &InputEmailDNSRecordsToCoworker{
+		LinkID:   29719392,
+		DomainID: 46873408,
+		Email:    "my_colleague@example.com",
+		Message:  "DNS Record for verification",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+}
+
+func TestEmailDNSRecordsToCoworker_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/dns/email", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	err := client.EmailDNSRecordsToCoworker(context.TODO(), &InputEmailDNSRecordsToCoworker{
+		LinkID:   29719392,
+		DomainID: 46873408,
+		Email:    "my_colleague@example.com",
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestEmailDNSRecordsToCoworker_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	input := &InputEmailDNSRecordsToCoworker{
+		LinkID:   29719392,
+		DomainID: 46873408,
+		Email:    "my_colleague@example.com",
+	}
+	err := client.EmailDNSRecordsToCoworker(context.TODO(), input)
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestAssociateAuthenticatedDomainWithSubuserMultiple(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains/1234567/subuser:add", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			t.Errorf("Expected POST request, got %s", r.Method)
+		}
+
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"user_id": 9876543,
+			"subdomain": "em1234",
+			"domain": "example.com",
+			"username": "dummy",
+			"ips": [],
+			"custom_spf": true,
+			"default": false,
+			"legacy": false,
+			"automatic_security": false,
+			"valid": false,
+			"dns": {
+				"mail_server": {
+					"host": "em1234.example.com",
+					"type": "mx",
+					"data": "sendgrid.net",
+					"valid": false
+				},
+				"subdomain_spf": {
+					"host": "em1234.example.com",
+					"type": "txt",
+					"data": "v=spf1 ip4:192.168.1.1 ip4:192.168.0.1 -all",
+					"valid": false
+				},
+				"domain_spf": {
+					"host": "example.com",
+					"type": "txt",
+					"data": "v=spf1 include:em1234.example.com -all",
+					"valid": false
+				},
+				"dkim": {
+					"host": "s1._domainkey.example.com",
+					"type": "txt",
+					"data": "k=rsa; t=s; p=publicKey",
+					"valid": false
+				}
+			}
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.AssociateAuthenticatedDomainWithSubuserMultiple(context.TODO(), 1234567, &InputAssociateAuthenticatedDomainWithSubuserMultiple{
+		Username: "dummy",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputAssociateAuthenticatedDomainWithSubuserMultiple{
+		ID:                1234567,
+		UserID:            9876543,
+		Subdomain:         "em1234",
+		Domain:            "example.com",
+		Username:          "dummy",
+		IPs:               []string{},
+		CustomSpf:         true,
+		Default:           false,
+		Legacy:            false,
+		AutomaticSecurity: false,
+		Valid:             false,
+		DNS: DNS{
+			MailServer: Record{
+				Host:  "em1234.example.com",
+				Type:  "mx",
+				Data:  "sendgrid.net",
+				Valid: false,
+			},
+			SubdomainSpf: Record{
+				Host:  "em1234.example.com",
+				Type:  "txt",
+				Data:  "v=spf1 ip4:192.168.1.1 ip4:192.168.0.1 -all",
+				Valid: false,
+			},
+			DomainSpf: Record{
+				Host:  "example.com",
+				Type:  "txt",
+				Data:  "v=spf1 include:em1234.example.com -all",
+				Valid: false,
+			},
+			Dkim: Record{
+				Host:  "s1._domainkey.example.com",
+				Type:  "txt",
+				Data:  "k=rsa; t=s; p=publicKey",
+				Valid: false,
+			},
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestAssociateAuthenticatedDomainWithSubuserMultiple_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains/1234567/subuser:add", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.AssociateAuthenticatedDomainWithSubuserMultiple(context.TODO(), 1234567, &InputAssociateAuthenticatedDomainWithSubuserMultiple{
+		Username: "dummy",
+	})
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestAssociateAuthenticatedDomainWithSubuserMultiple_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	input := &InputAssociateAuthenticatedDomainWithSubuserMultiple{
+		Username: "testuser",
+	}
+	_, err := client.AssociateAuthenticatedDomainWithSubuserMultiple(context.TODO(), 12345, input)
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestGetAllAuthenticatedDomainsAssociatedWithSubuser(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains/subuser/all", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		q.Set("username", "dummy")
+		r.URL.RawQuery = q.Encode()
+
+		if _, err := fmt.Fprint(w, `[
+			{
+				"id": 1234567,
+				"user_id": 9876543,
+				"subdomain": "em1234",
+				"domain": "example.com",
+				"username": "dummy",
+				"ips": [],
+				"custom_spf": false,
+				"default": false,
+				"legacy": false,
+				"automatic_security": true,
+				"valid": false,
+				"dns": {
+					"mail_cname": {
+						"valid": false,
+						"type": "cname",
+						"host": "em1234.example.com",
+						"data": "u1234567.wl123.sendgrid.net"
+					},
+					"dkim1": {
+						"valid": false,
+						"type":  "cname",
+						"host":  "s1._domainkey.example.com",
+						"data":  "s1.domainkey.u1234567.wl123.sendgrid.net"
+					},
+					"dkim2": {
+						"valid": false,
+						"type":  "cname",
+						"host":  "s2._domainkey.example.com",
+						"data":  "s2.domainkey.u1234567.wl123.sendgrid.net"
+					}
+				}
+			}
+		]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetAllAuthenticatedDomainsAssociatedWithSubuser(context.TODO(), "dummy")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := []*DomainAuthentication{
+		{
+			ID:                1234567,
+			UserID:            9876543,
+			Subdomain:         "em1234",
+			Domain:            "example.com",
+			Username:          "dummy",
+			IPs:               []string{},
+			CustomSpf:         false,
+			Default:           false,
+			Legacy:            false,
+			AutomaticSecurity: true,
+			Valid:             false,
+			DNS: DNS{
+				MailCname: Record{
+					Valid: false,
+					Type:  "cname",
+					Host:  "em1234.example.com",
+					Data:  "u1234567.wl123.sendgrid.net",
+				},
+				Dkim1: Record{
+					Valid: false,
+					Type:  "cname",
+					Host:  "s1._domainkey.example.com",
+					Data:  "s1.domainkey.u1234567.wl123.sendgrid.net",
+				},
+				Dkim2: Record{
+					Valid: false,
+					Type:  "cname",
+					Host:  "s2._domainkey.example.com",
+					Data:  "s2.domainkey.u1234567.wl123.sendgrid.net",
+				},
+			},
+		},
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetAllAuthenticatedDomainsAssociatedWithSubuser_EscapesUsername(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains/subuser/all", func(w http.ResponseWriter, r *http.Request) {
+		q := r.URL.Query()
+		if got := q.Get("username"); got != "sub&user=x #1" {
+			t.Errorf("username = %q, want %q", got, "sub&user=x #1")
+		}
+		if len(q) != 1 {
+			t.Errorf("query = %v, want only username", q)
+		}
+		if _, err := fmt.Fprint(w, `[]`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if _, err := client.GetAllAuthenticatedDomainsAssociatedWithSubuser(context.TODO(), "sub&user=x #1"); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
+func TestGetAllAuthenticatedDomainsAssociatedWithSubuser_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/domains/subuser/all", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetAllAuthenticatedDomainsAssociatedWithSubuser(context.TODO(), "dummy")
+	if err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestGetAllAuthenticatedDomainsAssociatedWithSubuser_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetAllAuthenticatedDomainsAssociatedWithSubuser(context.TODO(), "dummy")
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
