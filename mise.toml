@@ -25,6 +25,10 @@ run = "go test -v -count=1 -timeout 300s -short -race $(go list ./... | grep -v 
 description = "Execute integrated tests"
 run = "go test -v -count=1 -timeout 600s $(go list ./... | grep -v examples)"
 
+[tasks."test-live"]
+description = "Execute tests against the real SendGrid API (use a dedicated test account)"
+run = "go test -tags live -v -count=1 -timeout 600s -run '^TestLive' ."
+
 [tasks.cov]
 description = "Output coverage of testing"
 run = """
