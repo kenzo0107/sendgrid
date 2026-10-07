@@ -27,6 +27,7 @@ type Version struct {
 	PlainContent         string `json:"plain_content,omitempty"`
 	Editor               string `json:"editor,omitempty"`
 	ThumbnailURL         string `json:"thumbnail_url,omitempty"`
+	Active               int    `json:"active,omitempty"`
 }
 
 type Warning struct {

@@ -599,3 +599,170 @@ func TestGetPreBuiltDesigns_NewRequestError(t *testing.T) {
 
 	client.baseURL = originalBaseURL
 }
+
+func TestGetPreBuiltDesign(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/designs/pre-builts/12345678-90ab-1234-56cd-efghijk78901", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": "12345678-90ab-1234-56cd-efghijk78901",
+			"updated_at": "2024-05-22T01:59:57Z",
+			"created_at": "2024-05-22T01:59:57Z",
+			"thumbnail_url": "//us-east-2-production-thumbnail-bucket.s3.amazonaws.com/xxx.png",
+			"name": "pre-built-example",
+			"editor": "design",
+			"html_content": "<html><body><h1>Hello, World!</h1></body></html>",
+			"plain_content": "",
+			"generate_plain_content": false,
+			"subject": "",
+			"categories": []
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetPreBuiltDesign(context.TODO(), "12345678-90ab-1234-56cd-efghijk78901")
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputGetPreBuiltDesign{
+		ID:                   "12345678-90ab-1234-56cd-efghijk78901",
+		UpdatedAt:            "2024-05-22T01:59:57Z",
+		CreatedAt:            "2024-05-22T01:59:57Z",
+		ThumbnailURL:         "//us-east-2-production-thumbnail-bucket.s3.amazonaws.com/xxx.png",
+		Name:                 "pre-built-example",
+		Editor:               "design",
+		HTMLContent:          "<html><body><h1>Hello, World!</h1></body></html>",
+		PlainContent:         "",
+		GeneratePlainContent: false,
+		Subject:              "",
+		Categories:           []string{},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetPreBuiltDesign_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/designs/pre-builts/12345678-90ab-1234-56cd-efghijk78901", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.GetPreBuiltDesign(context.TODO(), "12345678-90ab-1234-56cd-efghijk78901")
+	if err == nil {
+		t.Fatal("expected an error but got nil")
+	}
+}
+
+func TestGetPreBuiltDesign_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetPreBuiltDesign(context.TODO(), "test-design-id")
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
+
+func TestDuplicatePreBuiltDesign(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/designs/pre-builts/12345678-90ab-1234-56cd-efghijk78901", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": "98765432-10ab-4321-56cd-efghijk78901",
+			"updated_at": "2024-05-22T01:59:57Z",
+			"created_at": "2024-05-22T01:59:57Z",
+			"thumbnail_url": "//us-east-2-production-thumbnail-bucket.s3.amazonaws.com/xxx.png",
+			"name": "pre-built-example copy",
+			"editor": "design",
+			"html_content": "<html><body><h1>Hello, World!</h1></body></html>",
+			"plain_content": "",
+			"generate_plain_content": false,
+			"subject": "",
+			"categories": []
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	r, err := client.DuplicatePreBuiltDesign(context.TODO(), "12345678-90ab-1234-56cd-efghijk78901", &InputDuplicatePreBuiltDesign{
+		Name:   "pre-built-example copy",
+		Editor: "design",
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputDuplicatePreBuiltDesign{
+		ID:                   "98765432-10ab-4321-56cd-efghijk78901",
+		UpdatedAt:            "2024-05-22T01:59:57Z",
+		CreatedAt:            "2024-05-22T01:59:57Z",
+		ThumbnailURL:         "//us-east-2-production-thumbnail-bucket.s3.amazonaws.com/xxx.png",
+		Name:                 "pre-built-example copy",
+		Editor:               "design",
+		HTMLContent:          "<html><body><h1>Hello, World!</h1></body></html>",
+		PlainContent:         "",
+		GeneratePlainContent: false,
+		Subject:              "",
+		Categories:           []string{},
+	}
+
+	if !reflect.DeepEqual(want, r) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, r)))
+	}
+}
+
+func TestDuplicatePreBuiltDesign_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/designs/pre-builts/12345678-90ab-1234-56cd-efghijk78901", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	})
+
+	_, err := client.DuplicatePreBuiltDesign(context.TODO(), "12345678-90ab-1234-56cd-efghijk78901", &InputDuplicatePreBuiltDesign{
+		Name: "pre-built-example copy",
+	})
+	if err == nil {
+		t.Fatal("expected an error but got nil")
+	}
+}
+
+func TestDuplicatePreBuiltDesign_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.DuplicatePreBuiltDesign(context.TODO(), "test-design-id", &InputDuplicatePreBuiltDesign{
+		Name: "test",
+	})
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
