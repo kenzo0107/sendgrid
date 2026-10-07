@@ -1316,3 +1316,121 @@ func TestGetBounces_ComprehensiveAddOptionsCoverage(t *testing.T) {
 		})
 	}
 }
+
+// Bounce Classifications API tests
+func TestGetBounceClassifications(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/suppression/bounces/classifications", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"result":[{"date":"2022-01-01","stats":[{"classification":"Unclassified","count":35},{"classification":"Invalid Address","count":14}]}]}`))
+	})
+
+	ctx := context.Background()
+	opts := &InputGetBounceClassifications{
+		StartDate: "2022-01-01",
+		EndDate:   "2022-01-02",
+	}
+	output, err := client.GetBounceClassifications(ctx, opts)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, output)
+	assert.Len(t, output.Result, 1)
+	assert.Equal(t, "2022-01-01", output.Result[0].Date)
+	assert.Len(t, output.Result[0].Stats, 2)
+	assert.Equal(t, "Unclassified", output.Result[0].Stats[0].Classification)
+	assert.Equal(t, 35, output.Result[0].Stats[0].Count)
+}
+
+func TestGetBounceClassifications_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/suppression/bounces/classifications", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error": "Internal server error"}`))
+	})
+
+	ctx := context.Background()
+	_, err := client.GetBounceClassifications(ctx, nil)
+
+	assert.Error(t, err)
+}
+
+func TestGetBounceClassifications_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetBounceClassifications(context.TODO(), nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "trailing slash")
+
+	client.baseURL = originalBaseURL
+}
+
+// Bounce Classifications By Domain API tests
+func TestGetBounceClassificationsByDomain(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/suppression/bounces/classifications/Unclassified", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte(`{"result":[{"date":"2022-01-01","stats":[{"domain":"example.com","count":35},{"domain":"one.example.com","count":14}]}]}`))
+	})
+
+	ctx := context.Background()
+	opts := &InputGetBounceClassificationsByDomain{
+		StartDate: "2022-01-01",
+		EndDate:   "2022-01-02",
+	}
+	output, err := client.GetBounceClassificationsByDomain(ctx, "Unclassified", opts)
+
+	assert.NoError(t, err)
+	assert.NotNil(t, output)
+	assert.Len(t, output.Result, 1)
+	assert.Equal(t, "2022-01-01", output.Result[0].Date)
+	assert.Len(t, output.Result[0].Stats, 2)
+	assert.Equal(t, "example.com", output.Result[0].Stats[0].Domain)
+	assert.Equal(t, 35, output.Result[0].Stats[0].Count)
+}
+
+func TestGetBounceClassificationsByDomain_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/suppression/bounces/classifications/Unclassified", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "GET")
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(`{"error": "Internal server error"}`))
+	})
+
+	ctx := context.Background()
+	_, err := client.GetBounceClassificationsByDomain(ctx, "Unclassified", nil)
+
+	assert.Error(t, err)
+}
+
+func TestGetBounceClassificationsByDomain_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	_, err := client.GetBounceClassificationsByDomain(context.TODO(), "Unclassified", nil)
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "trailing slash")
+
+	client.baseURL = originalBaseURL
+}
