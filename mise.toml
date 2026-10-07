@@ -1,0 +1,41 @@
+[tools]
+golang = "1.23.4"
+golangci-lint = "1.62.2"
+
+# 秘匿情報 (SENDGRID_API_KEY など) は mise.local.toml (gitignore対象) に定義してください。
+# mise.local.toml は同一ディレクトリに配置するだけで自動的にマージされます。
+
+[tasks.upgrade]
+description = "Upgrade library"
+run = "go get -u -d ./..."
+
+[tasks.fmt]
+description = "Format code"
+run = "go fmt ./..."
+
+[tasks.test]
+description = "Execute unit tests"
+run = "go test -v -count=1 -timeout 300s -short $(go list ./... | grep -v examples)"
+
+[tasks."test-race"]
+description = "Execute race tests"
+run = "go test -v -count=1 -timeout 300s -short -race $(go list ./... | grep -v examples)"
+
+[tasks."test-integration"]
+description = "Execute integrated tests"
+run = "go test -v -count=1 -timeout 600s $(go list ./... | grep -v examples)"
+
+[tasks.cov]
+description = "Output coverage of testing"
+run = """
+go test -count 1 -coverprofile=cover.out $(go list ./... | grep -v examples)
+go tool cover -html=cover.out
+"""
+
+[tasks.lint]
+description = "Lint"
+run = "golangci-lint run --tests"
+
+[tasks."pr-prep"]
+description = "Execute this command before you creates a pull request"
+depends = ["fmt", "lint", "test-race", "test-integration"]
