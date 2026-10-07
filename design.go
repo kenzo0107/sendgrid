@@ -265,3 +265,70 @@ func (c *Client) DeleteDesign(ctx context.Context, id string) error {
 	}
 	return nil
 }
+
+type OutputGetPreBuiltDesign struct {
+	ID                   string   `json:"id,omitempty"`
+	UpdatedAt            string   `json:"updated_at,omitempty"`
+	CreatedAt            string   `json:"created_at,omitempty"`
+	ThumbnailURL         string   `json:"thumbnail_url,omitempty"`
+	Name                 string   `json:"name,omitempty"`
+	Editor               string   `json:"editor,omitempty"`
+	HTMLContent          string   `json:"html_content,omitempty"`
+	PlainContent         string   `json:"plain_content,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
+	Subject              string   `json:"subject,omitempty"`
+	Categories           []string `json:"categories,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/designs-api/get-sendgrid-pre-built-design
+func (c *Client) GetPreBuiltDesign(ctx context.Context, id string) (*OutputGetPreBuiltDesign, error) {
+	path := fmt.Sprintf("/designs/pre-builts/%s", id)
+
+	req, err := c.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputGetPreBuiltDesign)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+type InputDuplicatePreBuiltDesign struct {
+	Name   string `json:"name,omitempty"`
+	Editor string `json:"editor,omitempty"`
+}
+
+type OutputDuplicatePreBuiltDesign struct {
+	ID                   string   `json:"id,omitempty"`
+	UpdatedAt            string   `json:"updated_at,omitempty"`
+	CreatedAt            string   `json:"created_at,omitempty"`
+	ThumbnailURL         string   `json:"thumbnail_url,omitempty"`
+	Name                 string   `json:"name,omitempty"`
+	Editor               string   `json:"editor,omitempty"`
+	HTMLContent          string   `json:"html_content,omitempty"`
+	PlainContent         string   `json:"plain_content,omitempty"`
+	GeneratePlainContent bool     `json:"generate_plain_content,omitempty"`
+	Subject              string   `json:"subject,omitempty"`
+	Categories           []string `json:"categories,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/designs-api/duplicate-sendgrid-pre-built-design
+func (c *Client) DuplicatePreBuiltDesign(ctx context.Context, id string, input *InputDuplicatePreBuiltDesign) (*OutputDuplicatePreBuiltDesign, error) {
+	path := fmt.Sprintf("/designs/pre-builts/%s", id)
+
+	req, err := c.NewRequest("POST", path, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputDuplicatePreBuiltDesign)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}

@@ -33,7 +33,8 @@ func TestGetTemplate(t *testing.T) {
 				"html_content": "<html>\n<head>\n  <title>dummy</title>\n</head>\n<body>\ndummy\n</body>\n</html>\n",
 				"plain_content": "",
 				"editor": "code",
-				"thumbnail_url": "//thumbnail-bucket.s3.amazonaws.com/dummy.png"
+				"thumbnail_url": "//thumbnail-bucket.s3.amazonaws.com/dummy.png",
+				"active": 1
 			}]
 		}`); err != nil {
 			t.Fatal(err)
@@ -63,6 +64,7 @@ func TestGetTemplate(t *testing.T) {
 				PlainContent:         "",
 				Editor:               "code",
 				ThumbnailURL:         "//thumbnail-bucket.s3.amazonaws.com/dummy.png",
+				Active:               1,
 			},
 		},
 	}

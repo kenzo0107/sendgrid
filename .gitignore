@@ -21,6 +21,8 @@
 go.work
 
 .env*
+mise.local.toml
+mise.*.local.toml
 
 dist/
 

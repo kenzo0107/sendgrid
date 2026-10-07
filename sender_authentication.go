@@ -33,6 +33,7 @@ type DNS struct {
 	MailServer   Record `json:"mail_server,omitempty"`
 	SubdomainSpf Record `json:"subdomain_spf,omitempty"`
 	Dkim         Record `json:"dkim,omitempty"`
+	DomainSpf    Record `json:"domain_spf,omitempty"`
 }
 
 type Record struct {
@@ -134,18 +135,19 @@ func (c *Client) GetDefaultAuthentication(ctx context.Context, input *InputGetDe
 }
 
 type OutputGetAuthenticatedDomain struct {
-	ID                int64    `json:"id,omitempty"`
-	UserID            int64    `json:"user_id,omitempty"`
-	Subdomain         string   `json:"subdomain,omitempty"`
-	Domain            string   `json:"domain,omitempty"`
-	Username          string   `json:"username,omitempty"`
-	IPs               []string `json:"ips,omitempty"`
-	CustomSpf         bool     `json:"custom_spf,omitempty"`
-	Default           bool     `json:"default,omitempty"`
-	Legacy            bool     `json:"legacy,omitempty"`
-	AutomaticSecurity bool     `json:"automatic_security,omitempty"`
-	Valid             bool     `json:"valid,omitempty"`
-	DNS               DNS      `json:"dns,omitempty"`
+	ID                      int64    `json:"id,omitempty"`
+	UserID                  int64    `json:"user_id,omitempty"`
+	Subdomain               string   `json:"subdomain,omitempty"`
+	Domain                  string   `json:"domain,omitempty"`
+	Username                string   `json:"username,omitempty"`
+	IPs                     []string `json:"ips,omitempty"`
+	CustomSpf               bool     `json:"custom_spf,omitempty"`
+	Default                 bool     `json:"default,omitempty"`
+	Legacy                  bool     `json:"legacy,omitempty"`
+	AutomaticSecurity       bool     `json:"automatic_security,omitempty"`
+	Valid                   bool     `json:"valid,omitempty"`
+	DNS                     DNS      `json:"dns,omitempty"`
+	LastValidationAttemptAt int64    `json:"last_validation_attempt_at,omitempty"`
 }
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/retrieve-an-authenticated-domain
@@ -417,4 +419,74 @@ func (c *Client) DisassociateAuthenticatedDomainFromSubuser(ctx context.Context,
 		return err
 	}
 	return nil
+}
+
+type InputEmailDNSRecordsToCoworker struct {
+	LinkID   int64  `json:"link_id,omitempty"`
+	DomainID int64  `json:"domain_id,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Message  string `json:"message,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/email-dns-records-to-a-co-worker
+func (c *Client) EmailDNSRecordsToCoworker(ctx context.Context, input *InputEmailDNSRecordsToCoworker) error {
+	req, err := c.NewRequest("POST", "/whitelabel/dns/email", input)
+	if err != nil {
+		return err
+	}
+
+	if err := c.Do(ctx, req, nil); err != nil {
+		return err
+	}
+	return nil
+}
+
+type InputAssociateAuthenticatedDomainWithSubuserMultiple struct {
+	Username string `json:"username,omitempty"`
+}
+
+type OutputAssociateAuthenticatedDomainWithSubuserMultiple struct {
+	ID                int64    `json:"id,omitempty"`
+	UserID            int64    `json:"user_id,omitempty"`
+	Subdomain         string   `json:"subdomain,omitempty"`
+	Domain            string   `json:"domain,omitempty"`
+	Username          string   `json:"username,omitempty"`
+	IPs               []string `json:"ips,omitempty"`
+	CustomSpf         bool     `json:"custom_spf,omitempty"`
+	Default           bool     `json:"default,omitempty"`
+	Legacy            bool     `json:"legacy,omitempty"`
+	AutomaticSecurity bool     `json:"automatic_security,omitempty"`
+	Valid             bool     `json:"valid,omitempty"`
+	DNS               DNS      `json:"dns,omitempty"`
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/associate-an-authenticated-domain-with-a-given-user,-for-up-to-five-domains
+func (c *Client) AssociateAuthenticatedDomainWithSubuserMultiple(ctx context.Context, domainId int64, input *InputAssociateAuthenticatedDomainWithSubuserMultiple) (*OutputAssociateAuthenticatedDomainWithSubuserMultiple, error) {
+	path := fmt.Sprintf("/whitelabel/domains/%s/subuser:add", strconv.FormatInt(domainId, 10))
+	req, err := c.NewRequest("POST", path, input)
+	if err != nil {
+		return nil, err
+	}
+
+	r := new(OutputAssociateAuthenticatedDomainWithSubuserMultiple)
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+// see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/list-all-the-authenticated-domains-associated-with-the-given-user
+func (c *Client) GetAllAuthenticatedDomainsAssociatedWithSubuser(ctx context.Context, subuserName string) ([]*DomainAuthentication, error) {
+	path := "/whitelabel/domains/subuser/all?" + url.Values{"username": {subuserName}}.Encode()
+
+	req, err := c.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	r := []*DomainAuthentication{}
+	if err := c.Do(ctx, req, &r); err != nil {
+		return nil, err
+	}
+	return r, nil
 }

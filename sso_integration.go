@@ -20,9 +20,12 @@ type OutputGetSSOIntegration struct {
 	AudienceURL          string `json:"audience_url,omitempty"`
 }
 
+// GetSSOIntegration always sends si=true: without it SendGrid omits
+// completed_integration from the response, which would decode as false.
+//
 // see: https://docs.sendgrid.com/api-reference/single-sign-on-settings/get-an-sso-integration
 func (c *Client) GetSSOIntegration(ctx context.Context, id string) (*OutputGetSSOIntegration, error) {
-	path := fmt.Sprintf("/sso/integrations/%s", id)
+	path := fmt.Sprintf("/sso/integrations/%s?si=true", id)
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -62,6 +65,7 @@ func (c *Client) GetSSOIntegrations(ctx context.Context, input *InputGetSSOInteg
 	if input.Si {
 		q.Set("si", strconv.FormatBool(input.Si))
 	}
+	u.RawQuery = q.Encode()
 
 	req, err := c.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -135,9 +139,12 @@ type OutputUpdateSSOIntegration struct {
 	AudienceURL          string `json:"audience_url,omitempty"`
 }
 
+// UpdateSSOIntegration always sends si=true so that the response includes
+// completed_integration, as GetSSOIntegration does.
+//
 // see: https://docs.sendgrid.com/api-reference/single-sign-on-settings/update-an-sso-integration
 func (c *Client) UpdateSSOIntegration(ctx context.Context, id string, input *InputUpdateSSOIntegration) (*OutputUpdateSSOIntegration, error) {
-	path := fmt.Sprintf("/sso/integrations/%s", id)
+	path := fmt.Sprintf("/sso/integrations/%s?si=true", id)
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {

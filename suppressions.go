@@ -397,3 +397,101 @@ func (c *Client) DeleteInvalidEmail(ctx context.Context, email string) error {
 
 	return nil
 }
+
+// BounceClassificationStat represents the bounce count for a single classification on a given date
+type BounceClassificationStat struct {
+	Classification string `json:"classification"`
+	Count          int    `json:"count"`
+}
+
+// BounceClassificationsByDate represents bounce classification stats for a single date
+type BounceClassificationsByDate struct {
+	Date  string                     `json:"date"`
+	Stats []BounceClassificationStat `json:"stats"`
+}
+
+// InputGetBounceClassifications represents query parameters for retrieving bounce classification totals
+type InputGetBounceClassifications struct {
+	StartDate string `url:"start_date,omitempty"`
+	EndDate   string `url:"end_date,omitempty"`
+}
+
+// OutputGetBounceClassifications represents the response for bounce classification totals
+type OutputGetBounceClassifications struct {
+	Result []BounceClassificationsByDate `json:"result,omitempty"`
+}
+
+// BounceClassificationDomainStat represents the bounce count for a single domain on a given date
+type BounceClassificationDomainStat struct {
+	Domain string `json:"domain"`
+	Count  int    `json:"count"`
+}
+
+// BounceClassificationDomainStatsByDate represents bounce classification domain stats for a single date
+type BounceClassificationDomainStatsByDate struct {
+	Date  string                           `json:"date"`
+	Stats []BounceClassificationDomainStat `json:"stats"`
+}
+
+// InputGetBounceClassificationsByDomain represents query parameters for retrieving bounce classification over time by domain stats
+type InputGetBounceClassificationsByDomain struct {
+	StartDate string `url:"start_date,omitempty"`
+	EndDate   string `url:"end_date,omitempty"`
+}
+
+// OutputGetBounceClassificationsByDomain represents the response for bounce classification over time by domain stats
+type OutputGetBounceClassificationsByDomain struct {
+	Result []BounceClassificationDomainStatsByDate `json:"result,omitempty"`
+}
+
+// GetBounceClassifications retrieves bounce classification totals
+// see: https://www.twilio.com/docs/sendgrid/api-reference/bounces/retrieve-bounce-classification-totals
+func (c *Client) GetBounceClassifications(ctx context.Context, opts *InputGetBounceClassifications) (*OutputGetBounceClassifications, error) {
+	path := "/suppression/bounces/classifications"
+
+	if opts != nil {
+		var err error
+		path, err = c.AddOptions(path, opts)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := c.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var output OutputGetBounceClassifications
+	if err := c.Do(ctx, req, &output); err != nil {
+		return nil, err
+	}
+
+	return &output, nil
+}
+
+// GetBounceClassificationsByDomain retrieves bounce classification over time by domain stats
+// see: https://www.twilio.com/docs/sendgrid/api-reference/bounces/retrieve-bounce-classification-over-time-by-domain-stats
+func (c *Client) GetBounceClassificationsByDomain(ctx context.Context, classification string, opts *InputGetBounceClassificationsByDomain) (*OutputGetBounceClassificationsByDomain, error) {
+	path := fmt.Sprintf("/suppression/bounces/classifications/%s", url.QueryEscape(classification))
+
+	if opts != nil {
+		var err error
+		path, err = c.AddOptions(path, opts)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	req, err := c.NewRequest("GET", path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var output OutputGetBounceClassificationsByDomain
+	if err := c.Do(ctx, req, &output); err != nil {
+		return nil, err
+	}
+
+	return &output, nil
+}
