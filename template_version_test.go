@@ -23,7 +23,12 @@ func TestGetTemplateVersion(t *testing.T) {
 			"name": "dummy",
 			"generate_plain_content": true,
 			"updated_at": "2024-01-20 08:46:07",
-			"editor": "code"
+			"editor": "code",
+			"warnings": [
+				{
+					"message": "Failed to validate handlebars"
+				}
+			]
 		  }`); err != nil {
 			t.Fatal(err)
 		}
@@ -43,6 +48,9 @@ func TestGetTemplateVersion(t *testing.T) {
 		GeneratePlainContent: true,
 		UpdatedAt:            "2024-01-20 08:46:07",
 		Editor:               "code",
+		Warnings: []Warning{
+			{Message: "Failed to validate handlebars"},
+		},
 	}
 	if !reflect.DeepEqual(want, expected) {
 		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
