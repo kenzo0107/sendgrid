@@ -6,19 +6,19 @@ import (
 )
 
 type OutputGetTemplateVersion struct {
-	ID                   string  `json:"id,omitempty"`
-	TemplateID           string  `json:"template_id,omitempty"`
-	Active               int     `json:"active,omitempty"`
-	Name                 string  `json:"name,omitempty"`
-	HTMLContent          string  `json:"html_content,omitempty"`
-	PlainContent         string  `json:"plain_content,omitempty"`
-	GeneratePlainContent bool    `json:"generate_plain_content,omitempty"`
-	Subject              string  `json:"subject,omitempty"`
-	Editor               string  `json:"editor,omitempty"`
-	TestData             string  `json:"test_data,omitempty"`
-	UpdatedAt            string  `json:"updated_at,omitempty"`
-	Warnings             Warning `json:"warnings,omitempty"`
-	ThumbnailURL         string  `json:"thumbnail_url,omitempty"`
+	ID                   string    `json:"id,omitempty"`
+	TemplateID           string    `json:"template_id,omitempty"`
+	Active               int       `json:"active,omitempty"`
+	Name                 string    `json:"name,omitempty"`
+	HTMLContent          string    `json:"html_content,omitempty"`
+	PlainContent         string    `json:"plain_content,omitempty"`
+	GeneratePlainContent bool      `json:"generate_plain_content,omitempty"`
+	Subject              string    `json:"subject,omitempty"`
+	Editor               string    `json:"editor,omitempty"`
+	TestData             string    `json:"test_data,omitempty"`
+	UpdatedAt            string    `json:"updated_at,omitempty"`
+	Warnings             []Warning `json:"warnings,omitempty"`
+	ThumbnailURL         string    `json:"thumbnail_url,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/retrieve-a-specific-transactional-template-version
