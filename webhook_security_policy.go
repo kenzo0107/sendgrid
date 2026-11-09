@@ -13,7 +13,8 @@ type WebhookSecurityPolicyOAuth struct {
 }
 
 type WebhookSecurityPolicySignature struct {
-	Enabled   bool   `json:"enabled,omitempty"`
+	// Not omitempty: the API removes the signature only when it receives enabled: false.
+	Enabled   bool   `json:"enabled"`
 	PublicKey string `json:"public_key,omitempty"`
 }
 

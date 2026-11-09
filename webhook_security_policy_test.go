@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -338,4 +339,30 @@ func TestDeleteWebhookSecurityPolicy_NewRequestError(t *testing.T) {
 	}
 
 	client.baseURL = originalBaseURL
+}
+
+func TestUpdateWebhookSecurityPolicy_DisableSignature(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/webhooks/security/policies/policy-1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "PATCH")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := `{"signature":{"enabled":false}}`; strings.TrimSpace(string(body)) != want {
+			t.Errorf("request body = %s, want %s", body, want)
+		}
+		if _, err := fmt.Fprint(w, `{"policy": {"id": "policy-1", "name": "policy"}}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	_, err := client.UpdateWebhookSecurityPolicy(context.TODO(), "policy-1", &InputUpdateWebhookSecurityPolicy{
+		Signature: &WebhookSecurityPolicySignature{Enabled: false},
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
 }
