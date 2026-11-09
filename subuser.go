@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Subuser struct {
@@ -81,7 +82,7 @@ type Reputation struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/retrieve-subuser-reputations
 func (c *Client) GetSubuserReputations(ctx context.Context, usernames string) ([]*Reputation, error) {
-	path := fmt.Sprintf("/subusers/reputations?usernames=%s", usernames)
+	path := fmt.Sprintf("/subusers/reputations?usernames=%s", escapeQueryList(strings.Split(usernames, ",")))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {

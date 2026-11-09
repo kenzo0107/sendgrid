@@ -113,7 +113,7 @@ type OutputGetSubuserBrandedLink struct {
 }
 
 func (c *Client) GetSubuserBrandedLink(ctx context.Context, subuser string) (*OutputGetSubuserBrandedLink, error) {
-	path := fmt.Sprintf("/whitelabel/links/subuser?username=%s", subuser)
+	path := fmt.Sprintf("/whitelabel/links/subuser?username=%s", url.QueryEscape(subuser))
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -213,7 +213,7 @@ func (c *Client) AssociateBrandedLinkWithSubuser(ctx context.Context, id int64, 
 }
 
 func (c *Client) DisassociateBrandedLinkWithSubuser(ctx context.Context, username string) error {
-	path := fmt.Sprintf("/whitelabel/links/subuser?username=%s", username)
+	path := fmt.Sprintf("/whitelabel/links/subuser?username=%s", url.QueryEscape(username))
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
 		return err

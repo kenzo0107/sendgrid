@@ -591,3 +591,60 @@ func TestStringPathParameterStaysInPath(t *testing.T) {
 		})
 	}
 }
+
+func TestQueryParameterValueStaysInOneParameter(t *testing.T) {
+	tests := []struct {
+		name      string
+		call      func(c *Client) error
+		response  string
+		wantQuery string
+	}{
+		{
+			name: "ampersand and fragment are escaped",
+			call: func(c *Client) error {
+				_, err := c.GetSubuserBrandedLink(context.TODO(), "a&username=b#c")
+				return err
+			},
+			response:  `{}`,
+			wantQuery: "username=a%26username%3Db%23c",
+		},
+		{
+			name: "list separator is kept as a raw comma",
+			call: func(c *Client) error {
+				_, err := c.GetCategoryStats(context.TODO(), []string{"news&letter", "promo"}, nil)
+				return err
+			},
+			response:  `[]`,
+			wantQuery: "categories=news%26letter,promo",
+		},
+		{
+			name: "comma-separated usernames are kept as a list",
+			call: func(c *Client) error {
+				_, err := c.GetSubuserReputations(context.TODO(), "user1,user#2")
+				return err
+			},
+			response:  `[]`,
+			wantQuery: "usernames=user1,user%232",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux, _, teardown := setup()
+			defer teardown()
+
+			var gotQuery string
+			mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				gotQuery = r.URL.RawQuery
+				fmt.Fprint(w, tt.response)
+			})
+
+			if err := tt.call(client); err != nil {
+				t.Fatalf("Unexpected error: %s", err)
+			}
+			if gotQuery != tt.wantQuery {
+				t.Errorf("query = %q, want %q", gotQuery, tt.wantQuery)
+			}
+		})
+	}
+}
