@@ -359,7 +359,7 @@ type OutputGetAuthenticatedDomainAssociatedWithSubuser struct {
 }
 
 func (c *Client) GetAuthenticatedDomainAssociatedWithSubuser(ctx context.Context, subuserName string) (*OutputGetAuthenticatedDomainAssociatedWithSubuser, error) {
-	path := fmt.Sprintf("/whitelabel/domains/subuser?username=%s", subuserName)
+	path := fmt.Sprintf("/whitelabel/domains/subuser?username=%s", url.QueryEscape(subuserName))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -408,7 +408,7 @@ func (c *Client) AssociateAuthenticatedDomainWithSubuser(ctx context.Context, do
 }
 
 func (c *Client) DisassociateAuthenticatedDomainFromSubuser(ctx context.Context, subuserName string) error {
-	path := fmt.Sprintf("/whitelabel/domains/subuser?username=%s", subuserName)
+	path := fmt.Sprintf("/whitelabel/domains/subuser?username=%s", url.QueryEscape(subuserName))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

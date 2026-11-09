@@ -98,7 +98,7 @@ func (c *Client) GetGlobalStats(ctx context.Context, opts *StatsOptions) ([]Glob
 // GetCategoryStats retrieves category email statistics
 // see: https://www.twilio.com/docs/sendgrid/api-reference/categories-statistics/retrieve-email-statistics-for-categories
 func (c *Client) GetCategoryStats(ctx context.Context, categories []string, opts *StatsOptions) ([]CategoryStat, error) {
-	path := fmt.Sprintf("/categories/stats?categories=%s", strings.Join(categories, ","))
+	path := fmt.Sprintf("/categories/stats?categories=%s", escapeQueryList(categories))
 
 	if opts != nil {
 		var err error
@@ -157,7 +157,7 @@ func (c *Client) GetCategorySums(ctx context.Context, opts *StatsOptions) ([]Cat
 // GetSubuserStats retrieves subuser email statistics
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subuser-statistics/retrieve-email-statistics-for-your-subusers
 func (c *Client) GetSubuserStats(ctx context.Context, subusers []string, opts *StatsOptions) ([]SubuserStat, error) {
-	path := fmt.Sprintf("/subusers/stats?subusers=%s", strings.Join(subusers, ","))
+	path := fmt.Sprintf("/subusers/stats?subusers=%s", escapeQueryList(subusers))
 
 	if opts != nil {
 		var err error
