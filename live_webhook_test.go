@@ -71,10 +71,7 @@ func TestLiveWebhookSecurityPolicyLifecycle(t *testing.T) {
 
 	if !eventually(t, 30*time.Second, func() bool {
 		policies, err := client.GetWebhookSecurityPolicies(ctx)
-		if err != nil {
-			t.Fatalf("GetWebhookSecurityPolicies: %v", err)
-		}
-		return slices.ContainsFunc(policies.Policies, func(p *WebhookSecurityPolicy) bool { return p.ID == id })
+		return err == nil && slices.ContainsFunc(policies.Policies, func(p *WebhookSecurityPolicy) bool { return p.ID == id })
 	}) {
 		t.Errorf("一覧に作成した policy %s がありません", id)
 	}
@@ -146,7 +143,9 @@ func TestLiveInboundParseWebhookSecurityPolicy(t *testing.T) {
 		})
 		return id
 	}
+	// 途中で 401/403 になってテスト全体が skip にならないよう、検証を始める前に両方作っておく
 	policyID := newPolicy("parse-policy")
+	forcedID := newPolicy("parse-policy-forced")
 
 	created, err := client.CreateInboundParseWebhook(ctx, &InputCreateInboundParseWebhook{
 		Hostname:       hostname,
@@ -182,8 +181,15 @@ func TestLiveInboundParseWebhookSecurityPolicy(t *testing.T) {
 		t.Errorf("SecurityPolicy を省いた更新で security_policy = %q になりました, want %q", updated.SecurityPolicy, policyID)
 	}
 
+	// 参照が反映される前だと force なしでも削除が通ってしまい、やり直せないため、先に反映を待つ
+	if !eventually(t, 30*time.Second, func() bool {
+		got, err = client.GetInboundParseWebhook(ctx, hostname)
+		return err == nil && got.SecurityPolicy == policyID
+	}) {
+		t.Fatalf("Parse 設定にポリシーの参照が反映されません: %+v (err: %v)", got, err)
+	}
 	if err := client.DeleteWebhookSecurityPolicy(ctx, policyID); err == nil || rec.lastStatus != http.StatusConflict {
-		t.Errorf("Parse 設定に付いたポリシーの force なし削除は 409 になる想定です (HTTP %d): %v", rec.lastStatus, err)
+		t.Fatalf("Parse 設定に付いたポリシーの force なし削除は 409 になる想定です (HTTP %d): %v", rec.lastStatus, err)
 	}
 
 	updated, err = client.UpdateInboundParseWebhook(ctx, hostname, &InputUpdateInboundParseWebhook{
@@ -197,7 +203,6 @@ func TestLiveInboundParseWebhookSecurityPolicy(t *testing.T) {
 		t.Errorf(`security_policy = "" で外れる想定です: %q`, updated.SecurityPolicy)
 	}
 
-	forcedID := newPolicy("parse-policy-forced")
 	if _, err := client.UpdateInboundParseWebhook(ctx, hostname, &InputUpdateInboundParseWebhook{
 		URL:            "https://example.com/parse2",
 		SecurityPolicy: String(forcedID),
