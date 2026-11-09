@@ -443,9 +443,9 @@ func TestUpdateInboundParseWebhook_SecurityPolicy(t *testing.T) {
 			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false,"security_policy":"policy-1"}`,
 		},
 		{
-			name:           "sends an empty string",
+			name:           "empty string detaches the policy with null",
 			securityPolicy: String(""),
-			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false,"security_policy":""}`,
+			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false,"security_policy":null}`,
 		},
 	}
 
