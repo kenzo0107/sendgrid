@@ -4,13 +4,14 @@ package sendgrid
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"slices"
 	"testing"
 	"time"
 )
 
-// Webhook Security Policy は更新・削除の結果が GET に反映されるまで数秒かかるため、1 回の再取得では判定できません。
+// Webhook Security Policy は作成・更新・削除の結果が GET や一覧に反映されるまで数秒かかるため、1 回の再取得では判定できません。
 func eventually(t *testing.T, timeout time.Duration, cond func() bool) bool {
 	t.Helper()
 
@@ -68,14 +69,16 @@ func TestLiveWebhookSecurityPolicyLifecycle(t *testing.T) {
 		t.Errorf("name = %q, want %q", got.Policy.Name, created.Policy.Name)
 	}
 
-	policies, err := client.GetWebhookSecurityPolicies(ctx)
-	if err != nil {
-		t.Fatalf("GetWebhookSecurityPolicies: %v", err)
-	}
-	assertNoUnknownFields[OutputGetWebhookSecurityPolicies](t, rec)
-	if !slices.ContainsFunc(policies.Policies, func(p *WebhookSecurityPolicy) bool { return p.ID == id }) {
+	if !eventually(t, 30*time.Second, func() bool {
+		policies, err := client.GetWebhookSecurityPolicies(ctx)
+		if err != nil {
+			t.Fatalf("GetWebhookSecurityPolicies: %v", err)
+		}
+		return slices.ContainsFunc(policies.Policies, func(p *WebhookSecurityPolicy) bool { return p.ID == id })
+	}) {
 		t.Errorf("一覧に作成した policy %s がありません", id)
 	}
+	assertNoUnknownFields[OutputGetWebhookSecurityPolicies](t, rec)
 
 	newName := liveName("policy-updated")
 	updated, err := client.UpdateWebhookSecurityPolicy(ctx, id, &InputUpdateWebhookSecurityPolicy{
@@ -104,4 +107,114 @@ func TestLiveWebhookSecurityPolicyLifecycle(t *testing.T) {
 		return rec.lastStatus == http.StatusNotFound
 	})
 	assertDeleted(t, rec, err, "Webhook Security Policy "+id)
+}
+
+func TestLiveInboundParseWebhookSecurityPolicy(t *testing.T) {
+	client, rec := newLiveClient(t)
+	ctx := context.Background()
+
+	if !isPrivateAccount() {
+		t.Skip("共有アカウントの Inbound Parse 設定を変更しないため skip")
+	}
+
+	domains, err := client.GetAuthenticatedDomains(ctx, &InputGetAuthenticatedDomains{Limit: 50})
+	skipIfUnavailable(t, rec, err)
+	if err != nil {
+		t.Fatalf("GetAuthenticatedDomains: %v", err)
+	}
+	idx := slices.IndexFunc(domains, func(d *DomainAuthentication) bool { return d.Valid })
+	if idx < 0 {
+		t.Skip("Parse 設定の作成には検証済みの Authenticated Domain が必要なため skip")
+	}
+	hostname := fmt.Sprintf("%sparse-%d.%s", liveResourcePrefix, time.Now().UnixNano(), domains[idx].Domain)
+
+	newPolicy := func(suffix string) string {
+		t.Helper()
+		created, err := client.CreateWebhookSecurityPolicy(ctx, &InputCreateWebhookSecurityPolicy{
+			Name:      liveName(suffix),
+			Signature: &WebhookSecurityPolicySignature{Enabled: true},
+		})
+		skipIfUnavailable(t, rec, err)
+		if err != nil {
+			t.Fatalf("CreateWebhookSecurityPolicy: %v", err)
+		}
+		id := created.Policy.ID
+		t.Cleanup(func() {
+			if err := client.DeleteWebhookSecurityPolicyWithOptions(context.Background(), id, &InputDeleteWebhookSecurityPolicy{Force: true}); err != nil && rec.lastStatus != http.StatusNotFound {
+				t.Errorf("Webhook Security Policy %s の後片付けに失敗しました: %v", id, err)
+			}
+		})
+		return id
+	}
+	policyID := newPolicy("parse-policy")
+
+	created, err := client.CreateInboundParseWebhook(ctx, &InputCreateInboundParseWebhook{
+		Hostname:       hostname,
+		URL:            "https://example.com/parse",
+		SecurityPolicy: policyID,
+	})
+	if err != nil {
+		t.Fatalf("CreateInboundParseWebhook: %v", err)
+	}
+	deleteParse := deleteOnce(t, "Inbound Parse "+hostname, func() error {
+		return client.DeleteInboundParseWebhook(context.Background(), hostname)
+	})
+	assertNoUnknownFields[OutputCreateInboundParseWebhook](t, rec)
+	if created.SecurityPolicy != policyID {
+		t.Errorf("作成時の security_policy = %q, want %q", created.SecurityPolicy, policyID)
+	}
+
+	got, err := client.GetInboundParseWebhook(ctx, hostname)
+	if err != nil {
+		t.Fatalf("GetInboundParseWebhook: %v", err)
+	}
+	assertNoUnknownFields[OutputGetInboundParseWebhook](t, rec)
+	if got.SecurityPolicy != policyID {
+		t.Errorf("security_policy = %q, want %q", got.SecurityPolicy, policyID)
+	}
+
+	updated, err := client.UpdateInboundParseWebhook(ctx, hostname, &InputUpdateInboundParseWebhook{URL: "https://example.com/parse2"})
+	if err != nil {
+		t.Fatalf("UpdateInboundParseWebhook: %v", err)
+	}
+	assertNoUnknownFields[OutputUpdateInboundParseWebhook](t, rec)
+	if updated.SecurityPolicy != policyID {
+		t.Errorf("SecurityPolicy を省いた更新で security_policy = %q になりました, want %q", updated.SecurityPolicy, policyID)
+	}
+
+	if err := client.DeleteWebhookSecurityPolicy(ctx, policyID); err == nil || rec.lastStatus != http.StatusConflict {
+		t.Errorf("Parse 設定に付いたポリシーの force なし削除は 409 になる想定です (HTTP %d): %v", rec.lastStatus, err)
+	}
+
+	updated, err = client.UpdateInboundParseWebhook(ctx, hostname, &InputUpdateInboundParseWebhook{
+		URL:            "https://example.com/parse2",
+		SecurityPolicy: String(""),
+	})
+	if err != nil {
+		t.Fatalf("UpdateInboundParseWebhook: %v", err)
+	}
+	if updated.SecurityPolicy != "" {
+		t.Errorf(`security_policy = "" で外れる想定です: %q`, updated.SecurityPolicy)
+	}
+
+	forcedID := newPolicy("parse-policy-forced")
+	if _, err := client.UpdateInboundParseWebhook(ctx, hostname, &InputUpdateInboundParseWebhook{
+		URL:            "https://example.com/parse2",
+		SecurityPolicy: String(forcedID),
+	}); err != nil {
+		t.Fatalf("UpdateInboundParseWebhook: %v", err)
+	}
+	if err := client.DeleteWebhookSecurityPolicyWithOptions(ctx, forcedID, &InputDeleteWebhookSecurityPolicy{Force: true}); err != nil {
+		t.Fatalf("DeleteWebhookSecurityPolicyWithOptions(force): %v", err)
+	}
+	if !eventually(t, 30*time.Second, func() bool {
+		got, err = client.GetInboundParseWebhook(ctx, hostname)
+		return err == nil && got.SecurityPolicy == ""
+	}) {
+		t.Errorf("force 削除後も Parse 設定に参照が残っています: %+v (err: %v)", got, err)
+	}
+
+	if err := deleteParse(); err != nil {
+		t.Fatalf("DeleteInboundParseWebhook: %v", err)
+	}
 }
