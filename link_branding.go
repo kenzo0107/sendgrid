@@ -259,6 +259,8 @@ type InputUpdateBrandedLink struct {
 	Default bool `json:"default"`
 }
 
+// OutputUpdateBrandedLink always reports AutoSSL as false and only the domain
+// and owner CNAMEs, even for an auto SSL link. Use GetBrandedLink for its current state.
 type OutputUpdateBrandedLink struct {
 	ID                      int64          `json:"id,omitempty"`
 	Domain                  string         `json:"domain,omitempty"`
