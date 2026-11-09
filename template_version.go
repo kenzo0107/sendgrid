@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type OutputGetTemplateVersion struct {
@@ -23,7 +24,7 @@ type OutputGetTemplateVersion struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/retrieve-a-specific-transactional-template-version
 func (c *Client) GetTemplateVersion(ctx context.Context, templateID, versionID string) (*OutputGetTemplateVersion, error) {
-	path := fmt.Sprintf("/templates/%s/versions/%s", templateID, versionID)
+	path := fmt.Sprintf("/templates/%s/versions/%s", url.PathEscape(templateID), url.PathEscape(versionID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -67,7 +68,7 @@ type OutputCreateTemplateVersion struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/create-a-new-transactional-template-version
 func (c *Client) CreateTemplateVersion(ctx context.Context, templateID string, input *InputCreateTemplateVersion) (*OutputCreateTemplateVersion, error) {
-	path := fmt.Sprintf("/templates/%s/versions", templateID)
+	path := fmt.Sprintf("/templates/%s/versions", url.PathEscape(templateID))
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
 		return nil, err
@@ -109,7 +110,7 @@ type OutputUpdateTemplateVersion struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/edit-a-transactional-template-version
 func (c *Client) UpdateTemplateVersion(ctx context.Context, templateID, versionID string, input *InputUpdateTemplateVersion) (*OutputUpdateTemplateVersion, error) {
-	path := fmt.Sprintf("/templates/%s/versions/%s", templateID, versionID)
+	path := fmt.Sprintf("/templates/%s/versions/%s", url.PathEscape(templateID), url.PathEscape(versionID))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -142,7 +143,7 @@ type OutputActivateTemplateVersion struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/activate-a-transactional-template-version
 func (c *Client) ActivateTemplateVersion(ctx context.Context, templateID, versionID string) (*OutputActivateTemplateVersion, error) {
-	path := fmt.Sprintf("/templates/%s/versions/%s/activate", templateID, versionID)
+	path := fmt.Sprintf("/templates/%s/versions/%s/activate", url.PathEscape(templateID), url.PathEscape(versionID))
 
 	req, err := c.NewRequest("POST", path, nil)
 	if err != nil {
@@ -159,7 +160,7 @@ func (c *Client) ActivateTemplateVersion(ctx context.Context, templateID, versio
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates-versions/delete-a-transactional-template-version
 func (c *Client) DeleteTemplateVersion(ctx context.Context, templateID, versionID string) error {
-	path := fmt.Sprintf("/templates/%s/versions/%s", templateID, versionID)
+	path := fmt.Sprintf("/templates/%s/versions/%s", url.PathEscape(templateID), url.PathEscape(versionID))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

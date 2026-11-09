@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type OutputGetInboundParseWebhooks struct {
@@ -42,7 +43,7 @@ type OutputGetInboundParseWebhook struct {
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/retrieve-a-specific-parse-setting
 func (c *Client) GetInboundParseWebhook(ctx context.Context, hostname string) (*OutputGetInboundParseWebhook, error) {
-	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
+	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", url.PathEscape(hostname))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -106,7 +107,7 @@ type OutputUpdateInboundParseWebhook struct {
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/update-a-parse-setting
 func (c *Client) UpdateInboundParseWebhook(ctx context.Context, hostname string, input *InputUpdateInboundParseWebhook) (*OutputUpdateInboundParseWebhook, error) {
-	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
+	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", url.PathEscape(hostname))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -123,7 +124,7 @@ func (c *Client) UpdateInboundParseWebhook(ctx context.Context, hostname string,
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/delete-a-parse-setting
 func (c *Client) DeleteInboundParseWebhook(ctx context.Context, hostname string) error {
-	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", hostname)
+	path := fmt.Sprintf("/user/webhooks/parse/settings/%s", url.PathEscape(hostname))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

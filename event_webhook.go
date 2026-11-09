@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type OutputGetEventWebhook struct {
@@ -28,7 +29,7 @@ type OutputGetEventWebhook struct {
 
 // see: https://docs.sendgrid.com/api-reference/webhooks/get-an-event-webhook
 func (c *Client) GetEventWebhook(ctx context.Context, id string) (*OutputGetEventWebhook, error) {
-	path := fmt.Sprintf("/user/webhooks/event/settings/%s", id)
+	path := fmt.Sprintf("/user/webhooks/event/settings/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -186,7 +187,7 @@ type OutputUpdateEventWebhook struct {
 
 // see: https://docs.sendgrid.com/api-reference/webhooks/update-an-event-webhook
 func (c *Client) UpdateEventWebhook(ctx context.Context, id string, input *InputUpdateEventWebhook) (*OutputUpdateEventWebhook, error) {
-	path := fmt.Sprintf("/user/webhooks/event/settings/%s", id)
+	path := fmt.Sprintf("/user/webhooks/event/settings/%s", url.PathEscape(id))
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
 		return nil, err
@@ -202,7 +203,7 @@ func (c *Client) UpdateEventWebhook(ctx context.Context, id string, input *Input
 
 // see: https://docs.sendgrid.com/api-reference/webhooks/delete-an-event-webhook
 func (c *Client) DeleteEventWebhook(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/user/webhooks/event/settings/%s", id)
+	path := fmt.Sprintf("/user/webhooks/event/settings/%s", url.PathEscape(id))
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
 		return err
@@ -226,7 +227,7 @@ type OutputToggleSignatureVerification struct {
 
 // see: https://docs.sendgrid.com/api-reference/webhooks/toggle-signature-verification-for-an-event-webhook
 func (c *Client) ToggleSignatureVerification(ctx context.Context, id string, input *InputToggleSignatureVerification) (*OutputToggleSignatureVerification, error) {
-	path := fmt.Sprintf("/user/webhooks/event/settings/signed/%s", id)
+	path := fmt.Sprintf("/user/webhooks/event/settings/signed/%s", url.PathEscape(id))
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
 		return nil, err
@@ -246,7 +247,7 @@ type OutputGetSignedEventWebhooksPublicKey struct {
 
 // see: https://docs.sendgrid.com/api-reference/webhooks/get-signed-event-webhooks-public-key
 func (c *Client) GetSignedEventWebhooksPublicKey(ctx context.Context, id string) (*OutputGetSignedEventWebhooksPublicKey, error) {
-	path := fmt.Sprintf("/user/webhooks/event/settings/signed/%s", id)
+	path := fmt.Sprintf("/user/webhooks/event/settings/signed/%s", url.PathEscape(id))
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, err

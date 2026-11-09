@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type OutputGetSSOCertificate struct {
@@ -40,7 +41,7 @@ type SSOCertificate struct {
 
 // see: https://docs.sendgrid.com/api-reference/certificates/get-all-sso-certificates-by-integration
 func (c *Client) GetSSOCertificates(ctx context.Context, integrationID string) ([]*SSOCertificate, error) {
-	path := fmt.Sprintf("/sso/integrations/%s/certificates", integrationID)
+	path := fmt.Sprintf("/sso/integrations/%s/certificates", url.PathEscape(integrationID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {

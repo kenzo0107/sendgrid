@@ -246,7 +246,7 @@ func (c *Client) AddIPToAuthenticatedDomain(ctx context.Context, domainId int64,
 // NOTE: The 'dns' key in the API response for removing an IP to the authenticated domain is different from what is documented.
 // see: https://www.twilio.com/docs/sendgrid/api-reference/domain-authentication/remove-an-ip-from-an-authenticated-domain
 func (c *Client) RemoveIPFromAuthenticatedDomain(ctx context.Context, domainId int64, ip string) error {
-	path := fmt.Sprintf("/whitelabel/domains/%s/ips/%s", strconv.FormatInt(domainId, 10), ip)
+	path := fmt.Sprintf("/whitelabel/domains/%s/ips/%s", strconv.FormatInt(domainId, 10), url.PathEscape(ip))
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
 		return err

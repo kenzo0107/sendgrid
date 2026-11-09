@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 // SendIPPoolRef represents an IP Pool an IP address is assigned to.
@@ -131,7 +132,7 @@ type OutputGetSendIP struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/get-details-for-an-ip-address
 func (c *Client) GetSendIP(ctx context.Context, ip string) (*OutputGetSendIP, error) {
-	path := fmt.Sprintf("/send_ips/ips/%s", ip)
+	path := fmt.Sprintf("/send_ips/ips/%s", url.PathEscape(ip))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -161,7 +162,7 @@ type OutputUpdateSendIP struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/update-details-for-an-ip-address
 func (c *Client) UpdateSendIP(ctx context.Context, ip string, input *InputUpdateSendIP) (*OutputUpdateSendIP, error) {
-	path := fmt.Sprintf("/send_ips/ips/%s", ip)
+	path := fmt.Sprintf("/send_ips/ips/%s", url.PathEscape(ip))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -197,7 +198,7 @@ type OutputGetSendIPSubusers struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/get-a-list-of-subusers-assigned-to-an-ip
 func (c *Client) GetSendIPSubusers(ctx context.Context, ip string, opts *InputGetSendIPSubusers) (*OutputGetSendIPSubusers, error) {
-	path, err := c.AddOptions(fmt.Sprintf("/send_ips/ips/%s/subusers", ip), opts)
+	path, err := c.AddOptions(fmt.Sprintf("/send_ips/ips/%s/subusers", url.PathEscape(ip)), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -226,7 +227,7 @@ type OutputBatchAddSendIPSubusers struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/assign-a-batch-of-subusers-to-an-ip
 func (c *Client) BatchAddSendIPSubusers(ctx context.Context, ip string, input *InputBatchAddSendIPSubusers) (*OutputBatchAddSendIPSubusers, error) {
-	path := fmt.Sprintf("/send_ips/ips/%s/subusers:batchAdd", ip)
+	path := fmt.Sprintf("/send_ips/ips/%s/subusers:batchAdd", url.PathEscape(ip))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
@@ -251,7 +252,7 @@ type OutputBatchDeleteSendIPSubusers struct{}
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/delete-a-batch-of-subusers-from-an-ip
 func (c *Client) BatchDeleteSendIPSubusers(ctx context.Context, ip string, input *InputBatchDeleteSendIPSubusers) (*OutputBatchDeleteSendIPSubusers, error) {
-	path := fmt.Sprintf("/send_ips/ips/%s/subusers:batchDelete", ip)
+	path := fmt.Sprintf("/send_ips/ips/%s/subusers:batchDelete", url.PathEscape(ip))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
@@ -360,7 +361,7 @@ type OutputGetSendIPPool struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/get-details-for-an-ip-pool
 func (c *Client) GetSendIPPool(ctx context.Context, poolID string) (*OutputGetSendIPPool, error) {
-	path := fmt.Sprintf("/send_ips/pools/%s", poolID)
+	path := fmt.Sprintf("/send_ips/pools/%s", url.PathEscape(poolID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -386,7 +387,7 @@ type OutputUpdateSendIPPool struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/update-an-ip-pool-name
 func (c *Client) UpdateSendIPPool(ctx context.Context, poolID string, input *InputUpdateSendIPPool) (*OutputUpdateSendIPPool, error) {
-	path := fmt.Sprintf("/send_ips/pools/%s", poolID)
+	path := fmt.Sprintf("/send_ips/pools/%s", url.PathEscape(poolID))
 
 	req, err := c.NewRequest("PUT", path, input)
 	if err != nil {
@@ -403,7 +404,7 @@ func (c *Client) UpdateSendIPPool(ctx context.Context, poolID string, input *Inp
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/delete-ip-pool
 func (c *Client) DeleteSendIPPool(ctx context.Context, poolID string) error {
-	path := fmt.Sprintf("/send_ips/pools/%s", poolID)
+	path := fmt.Sprintf("/send_ips/pools/%s", url.PathEscape(poolID))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
@@ -446,7 +447,7 @@ type OutputGetSendIPPoolIPs struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/get-ips-assigned-to-an-ip-pool
 func (c *Client) GetSendIPPoolIPs(ctx context.Context, poolID string, opts *InputGetSendIPPoolIPs) (*OutputGetSendIPPoolIPs, error) {
-	path, err := c.AddOptions(fmt.Sprintf("/send_ips/pools/%s/ips", poolID), opts)
+	path, err := c.AddOptions(fmt.Sprintf("/send_ips/pools/%s/ips", url.PathEscape(poolID)), opts)
 	if err != nil {
 		return nil, err
 	}
@@ -476,7 +477,7 @@ type OutputBatchAddSendIPPoolIPs struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/add-a-batch-of-ips-to-an-ip-pool
 func (c *Client) BatchAddSendIPPoolIPs(ctx context.Context, poolID string, input *InputBatchAddSendIPPoolIPs) (*OutputBatchAddSendIPPoolIPs, error) {
-	path := fmt.Sprintf("/send_ips/pools/%s/ips:batchAdd", poolID)
+	path := fmt.Sprintf("/send_ips/pools/%s/ips:batchAdd", url.PathEscape(poolID))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
@@ -501,7 +502,7 @@ type OutputBatchDeleteSendIPPoolIPs struct{}
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/ip-address-management/delete-a-batch-of-ips-from-an-ip-pool
 func (c *Client) BatchDeleteSendIPPoolIPs(ctx context.Context, poolID string, input *InputBatchDeleteSendIPPoolIPs) (*OutputBatchDeleteSendIPPoolIPs, error) {
-	path := fmt.Sprintf("/send_ips/pools/%s/ips:batchDelete", poolID)
+	path := fmt.Sprintf("/send_ips/pools/%s/ips:batchDelete", url.PathEscape(poolID))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {

@@ -537,3 +537,57 @@ func TestNewRequestURLConstruction(t *testing.T) {
 		})
 	}
 }
+
+func TestStringPathParameterStaysInPath(t *testing.T) {
+	tests := []struct {
+		name     string
+		call     func(c *Client) error
+		wantPath string
+	}{
+		{
+			name: "question mark and fragment are escaped",
+			call: func(c *Client) error {
+				return c.DeleteWebhookSecurityPolicy(context.TODO(), "abc?x=1#y")
+			},
+			wantPath: "/user/webhooks/security/policies/abc%3Fx=1%23y",
+		},
+		{
+			name: "slash is escaped",
+			call: func(c *Client) error {
+				_, err := c.GetTemplateVersion(context.TODO(), "tmpl/../other", "ver")
+				return err
+			},
+			wantPath: "/templates/tmpl%2F..%2Fother/versions/ver",
+		},
+		{
+			name: "email address is sent as-is",
+			call: func(c *Client) error {
+				return c.DeleteSuppressionFromGroup(context.TODO(), "1", "user+tag@example.com")
+			},
+			wantPath: "/asm/groups/1/suppressions/user+tag@example.com",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux, _, teardown := setup()
+			defer teardown()
+
+			var gotPath, gotQuery string
+			mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				gotPath, gotQuery = r.URL.EscapedPath(), r.URL.RawQuery
+				fmt.Fprint(w, `{}`)
+			})
+
+			if err := tt.call(client); err != nil {
+				t.Fatalf("Unexpected error: %s", err)
+			}
+			if gotPath != tt.wantPath {
+				t.Errorf("path = %q, want %q", gotPath, tt.wantPath)
+			}
+			if gotQuery != "" {
+				t.Errorf("query = %q, want empty", gotQuery)
+			}
+		})
+	}
+}

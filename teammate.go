@@ -35,7 +35,7 @@ type OutputGetTeammate struct {
 }
 
 func (c *Client) GetTeammate(ctx context.Context, username string) (*OutputGetTeammate, error) {
-	u := fmt.Sprintf("/teammates/%s", username)
+	u := fmt.Sprintf("/teammates/%s", url.PathEscape(username))
 
 	req, err := c.NewRequest("GET", u, nil)
 	if err != nil {
@@ -179,7 +179,7 @@ type OutputUpdateTeammatePermissions struct {
 }
 
 func (c *Client) UpdateTeammatePermissions(ctx context.Context, username string, input *InputUpdateTeammatePermissions) (*OutputUpdateTeammatePermissions, error) {
-	u := fmt.Sprintf("/teammates/%s", username)
+	u := fmt.Sprintf("/teammates/%s", url.PathEscape(username))
 
 	req, err := c.NewRequest("PATCH", u, input)
 	if err != nil {
@@ -194,7 +194,7 @@ func (c *Client) UpdateTeammatePermissions(ctx context.Context, username string,
 }
 
 func (c *Client) DeleteTeammate(ctx context.Context, username string) error {
-	u := fmt.Sprintf("/teammates/%s", username)
+	u := fmt.Sprintf("/teammates/%s", url.PathEscape(username))
 
 	req, err := c.NewRequest("DELETE", u, nil)
 	if err != nil {
@@ -208,7 +208,7 @@ func (c *Client) DeleteTeammate(ctx context.Context, username string) error {
 }
 
 func (c *Client) DeletePendingTeammate(ctx context.Context, token string) error {
-	u := fmt.Sprintf("/teammates/pending/%s", token)
+	u := fmt.Sprintf("/teammates/pending/%s", url.PathEscape(token))
 
 	req, err := c.NewRequest("DELETE", u, nil)
 	if err != nil {
@@ -253,7 +253,7 @@ type NextParams struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/teammates/get-teammate-subuser-access
 func (c *Client) GetTeammateSubuserAccess(ctx context.Context, teammateName string, input *InputGetTeammateSubuserAccess) (*OutputGetTeammateSubuserAccess, error) {
-	p := fmt.Sprintf("/teammates/%s/subuser_access", teammateName)
+	p := fmt.Sprintf("/teammates/%s/subuser_access", url.PathEscape(teammateName))
 	u, err := url.Parse(p)
 	if err != nil {
 		return nil, err
@@ -368,7 +368,7 @@ type OutputUpdateSSOTeammate struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/single-sign-on-teammates/edit-an-sso-teammate
 func (c *Client) UpdateSSOTeammate(ctx context.Context, username string, input *InputUpdateSSOTeammate) (*OutputUpdateSSOTeammate, error) {
-	u := fmt.Sprintf("/sso/teammates/%s", username)
+	u := fmt.Sprintf("/sso/teammates/%s", url.PathEscape(username))
 	req, err := c.NewRequest("PATCH", u, input)
 	if err != nil {
 		return nil, err

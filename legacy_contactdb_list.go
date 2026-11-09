@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type LegacyList struct {
@@ -202,7 +203,7 @@ func (c *Client) AddRecipientsToLegacyList(ctx context.Context, id int64, input 
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/lists/add-a-single-recipient-to-a-list
 func (c *Client) AddRecipientToLegacyList(ctx context.Context, listID int64, recipientID string) error {
-	path := fmt.Sprintf("/contactdb/lists/%d/recipients/%s", listID, recipientID)
+	path := fmt.Sprintf("/contactdb/lists/%d/recipients/%s", listID, url.PathEscape(recipientID))
 
 	req, err := c.NewRequest("POST", path, nil)
 	if err != nil {
@@ -218,7 +219,7 @@ func (c *Client) AddRecipientToLegacyList(ctx context.Context, listID int64, rec
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/lists/delete-a-single-recipient-from-a-single-list
 func (c *Client) RemoveRecipientFromLegacyList(ctx context.Context, listID int64, recipientID string) error {
-	path := fmt.Sprintf("/contactdb/lists/%d/recipients/%s", listID, recipientID)
+	path := fmt.Sprintf("/contactdb/lists/%d/recipients/%s", listID, url.PathEscape(recipientID))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

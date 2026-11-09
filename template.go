@@ -36,7 +36,7 @@ type Warning struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates/retrieve-a-single-transactional-template
 func (c *Client) GetTemplate(ctx context.Context, id string) (*OutputGetTemplate, error) {
-	path := fmt.Sprintf("/templates/%s", id)
+	path := fmt.Sprintf("/templates/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -149,7 +149,7 @@ type OutputDuplicateTemplate struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates/duplicate-a-transactional-template
 func (c *Client) DuplicateTemplate(ctx context.Context, id string, input *InputDuplicateTemplate) (*OutputDuplicateTemplate, error) {
-	path := fmt.Sprintf("/templates/%s", id)
+	path := fmt.Sprintf("/templates/%s", url.PathEscape(id))
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
 		return nil, err
@@ -176,7 +176,7 @@ type OutputUpdateTemplate struct {
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates/edit-a-transactional-template
 func (c *Client) UpdateTemplate(ctx context.Context, id string, input *InputUpdateTemplate) (*OutputUpdateTemplate, error) {
-	path := fmt.Sprintf("/templates/%s", id)
+	path := fmt.Sprintf("/templates/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -192,7 +192,7 @@ func (c *Client) UpdateTemplate(ctx context.Context, id string, input *InputUpda
 
 // see: https://docs.sendgrid.com/api-reference/transactional-templates/delete-a-template
 func (c *Client) DeleteTemplate(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/templates/%s", id)
+	path := fmt.Sprintf("/templates/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

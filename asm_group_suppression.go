@@ -62,7 +62,7 @@ func (c *Client) GetSuppressionGroupsByEmail(ctx context.Context, email string) 
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/suppressions-suppressions/retrieve-all-suppressions-for-a-suppression-group
 func (c *Client) GetSuppressionsForSuppressionGroup(ctx context.Context, groupID string) ([]string, error) {
-	path := fmt.Sprintf("/asm/groups/%s/suppressions", groupID)
+	path := fmt.Sprintf("/asm/groups/%s/suppressions", url.PathEscape(groupID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -82,7 +82,7 @@ type InputSearchGroupSuppressions struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/suppressions-suppressions/search-for-suppressions-within-a-group
 func (c *Client) SearchForSuppressionsWithinGroup(ctx context.Context, groupID string, input *InputSearchGroupSuppressions) ([]string, error) {
-	path := fmt.Sprintf("/asm/groups/%s/suppressions/search", groupID)
+	path := fmt.Sprintf("/asm/groups/%s/suppressions/search", url.PathEscape(groupID))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *Client) GetSuppressions(ctx context.Context) ([]*Suppression, error) {
 }
 
 func (c *Client) DeleteSuppressionFromGroup(ctx context.Context, groupID, email string) error {
-	path := fmt.Sprintf("/asm/groups/%s/suppressions/%s", groupID, email)
+	path := fmt.Sprintf("/asm/groups/%s/suppressions/%s", url.PathEscape(groupID), url.PathEscape(email))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
