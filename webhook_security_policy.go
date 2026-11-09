@@ -119,7 +119,20 @@ func (c *Client) UpdateWebhookSecurityPolicy(ctx context.Context, id string, inp
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/webhook-security-policies/delete-a-specific-webhook-security-policy
 func (c *Client) DeleteWebhookSecurityPolicy(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/user/webhooks/security/policies/%s", id)
+	return c.DeleteWebhookSecurityPolicyWithOptions(ctx, id, nil)
+}
+
+type InputDeleteWebhookSecurityPolicy struct {
+	Force bool `url:"force,omitempty"`
+}
+
+// A separate method keeps DeleteWebhookSecurityPolicy's signature, since adding a parameter to it would break v1 callers.
+// see: https://www.twilio.com/docs/sendgrid/api-reference/webhook-security-policies/delete-a-specific-webhook-security-policy
+func (c *Client) DeleteWebhookSecurityPolicyWithOptions(ctx context.Context, id string, input *InputDeleteWebhookSecurityPolicy) error {
+	path, err := c.AddOptions(fmt.Sprintf("/user/webhooks/security/policies/%s", id), input)
+	if err != nil {
+		return err
+	}
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
