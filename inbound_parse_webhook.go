@@ -10,10 +10,11 @@ type OutputGetInboundParseWebhooks struct {
 }
 
 type InboundParseWebhook struct {
-	URL       string `json:"url,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	URL            string `json:"url,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	SpamCheck      bool   `json:"spam_check,omitempty"`
+	SendRaw        bool   `json:"send_raw,omitempty"`
+	SecurityPolicy string `json:"security_policy,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/retrieve-all-parse-settings
@@ -32,10 +33,11 @@ func (c *Client) GetInboundParseWebhooks(ctx context.Context) ([]*InboundParseWe
 }
 
 type OutputGetInboundParseWebhook struct {
-	URL       string `json:"url,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	URL            string `json:"url,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	SpamCheck      bool   `json:"spam_check,omitempty"`
+	SendRaw        bool   `json:"send_raw,omitempty"`
+	SecurityPolicy string `json:"security_policy,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/retrieve-a-specific-parse-setting
@@ -56,17 +58,19 @@ func (c *Client) GetInboundParseWebhook(ctx context.Context, hostname string) (*
 }
 
 type InputCreateInboundParseWebhook struct {
-	URL       string `json:"url,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check"`
-	SendRaw   bool   `json:"send_raw"`
+	URL            string `json:"url,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	SpamCheck      bool   `json:"spam_check"`
+	SendRaw        bool   `json:"send_raw"`
+	SecurityPolicy string `json:"security_policy,omitempty"`
 }
 
 type OutputCreateInboundParseWebhook struct {
-	URL       string `json:"url,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	URL            string `json:"url,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	SpamCheck      bool   `json:"spam_check,omitempty"`
+	SendRaw        bool   `json:"send_raw,omitempty"`
+	SecurityPolicy string `json:"security_policy,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/create-a-parse-setting
@@ -88,13 +92,16 @@ type InputUpdateInboundParseWebhook struct {
 	URL       string `json:"url,omitempty"`
 	SpamCheck bool   `json:"spam_check"`
 	SendRaw   bool   `json:"send_raw"`
+	// A plain string would send "" on every update that does not set it, so nil is needed to leave the policy unchanged.
+	SecurityPolicy *string `json:"security_policy,omitempty"`
 }
 
 type OutputUpdateInboundParseWebhook struct {
-	URL       string `json:"url,omitempty"`
-	Hostname  string `json:"hostname,omitempty"`
-	SpamCheck bool   `json:"spam_check,omitempty"`
-	SendRaw   bool   `json:"send_raw,omitempty"`
+	URL            string `json:"url,omitempty"`
+	Hostname       string `json:"hostname,omitempty"`
+	SpamCheck      bool   `json:"spam_check,omitempty"`
+	SendRaw        bool   `json:"send_raw,omitempty"`
+	SecurityPolicy string `json:"security_policy,omitempty"`
 }
 
 // see: https://docs.sendgrid.com/api-reference/settings-inbound-parse/update-a-parse-setting
