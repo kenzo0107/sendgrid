@@ -8,20 +8,26 @@ import (
 )
 
 type OutputGetBrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 type DNSBrandedLink struct {
-	DomainCname Record `json:"domain_cname,omitempty"`
-	OwnerCname  Record `json:"owner_cname,omitempty"`
+	DomainCname         Record `json:"domain_cname,omitempty"`
+	OwnerCname          Record `json:"owner_cname,omitempty"`
+	AcmeChallengeCname  Record `json:"acme_challenge_cname,omitempty"`
+	CfCustomHostnameTxt Record `json:"cf_custom_hostname_txt,omitempty"`
 }
 
 func (c *Client) GetBrandedLink(ctx context.Context, id int64) (*OutputGetBrandedLink, error) {
@@ -39,15 +45,19 @@ func (c *Client) GetBrandedLink(ctx context.Context, id int64) (*OutputGetBrande
 }
 
 type OutputGetDefaultBrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) GetDefaultBrandedLink(ctx context.Context) (*OutputGetDefaultBrandedLink, error) {
@@ -68,15 +78,19 @@ type InputGetBrandedLinks struct {
 }
 
 type BrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) GetBrandedLinks(ctx context.Context, input *InputGetBrandedLinks) ([]*BrandedLink, error) {
@@ -101,15 +115,19 @@ func (c *Client) GetBrandedLinks(ctx context.Context, input *InputGetBrandedLink
 }
 
 type OutputGetSubuserBrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) GetSubuserBrandedLink(ctx context.Context, subuser string) (*OutputGetSubuserBrandedLink, error) {
@@ -130,18 +148,24 @@ type InputCreateBrandedLink struct {
 	Domain    string `json:"domain,omitempty"`
 	Subdomain string `json:"subdomain,omitempty"`
 	Default   bool   `json:"default"`
+	Region    string `json:"region,omitempty"`
+	AutoSSL   bool   `json:"auto_ssl,omitempty"`
 }
 
 type OutputCreateBrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) CreateBrandedLink(ctx context.Context, input *InputCreateBrandedLink) (*OutputCreateBrandedLink, error) {
@@ -164,8 +188,10 @@ type OutputValidateBrandedLink struct {
 }
 
 type ValidationResultsBrandedLink struct {
-	DomainCname ValidationResult `json:"domain_cname,omitempty"`
-	OwnerCname  ValidationResult `json:"owner_cname,omitempty"`
+	DomainCname         ValidationResult `json:"domain_cname,omitempty"`
+	OwnerCname          ValidationResult `json:"owner_cname,omitempty"`
+	AcmeChallengeCname  ValidationResult `json:"acme_challenge_cname,omitempty"`
+	CfCustomHostnameTxt ValidationResult `json:"cf_custom_hostname_txt,omitempty"`
 }
 
 func (c *Client) ValidateBrandedLink(ctx context.Context, id int64) (*OutputValidateBrandedLink, error) {
@@ -187,15 +213,19 @@ type InputAssociateBrandedLinkWithSubuser struct {
 }
 
 type OutputAssociateBrandedLinkWithSubuser struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) AssociateBrandedLinkWithSubuser(ctx context.Context, id int64, input *InputAssociateBrandedLinkWithSubuser) (*OutputAssociateBrandedLinkWithSubuser, error) {
@@ -230,15 +260,19 @@ type InputUpdateBrandedLink struct {
 }
 
 type OutputUpdateBrandedLink struct {
-	ID        int64          `json:"id,omitempty"`
-	Domain    string         `json:"domain,omitempty"`
-	Subdomain string         `json:"subdomain,omitempty"`
-	Username  string         `json:"username,omitempty"`
-	UserID    int64          `json:"user_id,omitempty"`
-	Default   bool           `json:"default,omitempty"`
-	Valid     bool           `json:"valid,omitempty"`
-	Legacy    bool           `json:"legacy,omitempty"`
-	DNS       DNSBrandedLink `json:"dns,omitempty"`
+	ID                      int64          `json:"id,omitempty"`
+	Domain                  string         `json:"domain,omitempty"`
+	Subdomain               string         `json:"subdomain,omitempty"`
+	Username                string         `json:"username,omitempty"`
+	UserID                  int64          `json:"user_id,omitempty"`
+	Default                 bool           `json:"default,omitempty"`
+	Valid                   bool           `json:"valid,omitempty"`
+	Legacy                  bool           `json:"legacy,omitempty"`
+	Region                  string         `json:"region,omitempty"`
+	AutoSSL                 bool           `json:"auto_ssl,omitempty"`
+	AutoSSLAvailable        bool           `json:"auto_ssl_available,omitempty"`
+	LastValidationAttemptAt int64          `json:"last_validation_attempt_at,omitempty"`
+	DNS                     DNSBrandedLink `json:"dns,omitempty"`
 }
 
 func (c *Client) UpdateBrandedLink(ctx context.Context, id int64, input *InputUpdateBrandedLink) (*OutputUpdateBrandedLink, error) {
