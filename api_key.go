@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type APIKey struct {
@@ -35,7 +36,7 @@ type OutputGetAPIKey struct {
 }
 
 func (c *Client) GetAPIKey(ctx context.Context, apiKeyId string) (*OutputGetAPIKey, error) {
-	path := fmt.Sprintf("/api_keys/%s", apiKeyId)
+	path := fmt.Sprintf("/api_keys/%s", url.PathEscape(apiKeyId))
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -85,7 +86,7 @@ type OutputUpdateAPIKeyName struct {
 }
 
 func (c *Client) UpdateAPIKeyName(ctx context.Context, apiKeyId string, input *InputUpdateAPIKeyName) (*OutputUpdateAPIKeyName, error) {
-	u := fmt.Sprintf("/api_keys/%s", apiKeyId)
+	u := fmt.Sprintf("/api_keys/%s", url.PathEscape(apiKeyId))
 
 	req, err := c.NewRequest("PATCH", u, input)
 	if err != nil {
@@ -112,7 +113,7 @@ type OutputUpdateAPIKeyNameAndScopes struct {
 }
 
 func (c *Client) UpdateAPIKeyNameAndScopes(ctx context.Context, apiKeyId string, input *InputUpdateAPIKeyNameAndScopes) (*OutputUpdateAPIKeyNameAndScopes, error) {
-	u := fmt.Sprintf("/api_keys/%s", apiKeyId)
+	u := fmt.Sprintf("/api_keys/%s", url.PathEscape(apiKeyId))
 
 	req, err := c.NewRequest("PUT", u, input)
 	if err != nil {
@@ -128,7 +129,7 @@ func (c *Client) UpdateAPIKeyNameAndScopes(ctx context.Context, apiKeyId string,
 }
 
 func (c *Client) DeleteAPIKey(ctx context.Context, apiKeyId string) error {
-	u := fmt.Sprintf("/api_keys/%s", apiKeyId)
+	u := fmt.Sprintf("/api_keys/%s", url.PathEscape(apiKeyId))
 
 	req, err := c.NewRequest("DELETE", u, nil)
 	if err != nil {

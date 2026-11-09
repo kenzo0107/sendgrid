@@ -25,7 +25,7 @@ type OutputGetSSOIntegration struct {
 //
 // see: https://docs.sendgrid.com/api-reference/single-sign-on-settings/get-an-sso-integration
 func (c *Client) GetSSOIntegration(ctx context.Context, id string) (*OutputGetSSOIntegration, error) {
-	path := fmt.Sprintf("/sso/integrations/%s?si=true", id)
+	path := fmt.Sprintf("/sso/integrations/%s?si=true", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -144,7 +144,7 @@ type OutputUpdateSSOIntegration struct {
 //
 // see: https://docs.sendgrid.com/api-reference/single-sign-on-settings/update-an-sso-integration
 func (c *Client) UpdateSSOIntegration(ctx context.Context, id string, input *InputUpdateSSOIntegration) (*OutputUpdateSSOIntegration, error) {
-	path := fmt.Sprintf("/sso/integrations/%s?si=true", id)
+	path := fmt.Sprintf("/sso/integrations/%s?si=true", url.PathEscape(id))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -161,7 +161,7 @@ func (c *Client) UpdateSSOIntegration(ctx context.Context, id string, input *Inp
 
 // see: https://docs.sendgrid.com/api-reference/single-sign-on-settings/delete-an-sso-integration
 func (c *Client) DeleteSSOIntegration(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/sso/integrations/%s", id)
+	path := fmt.Sprintf("/sso/integrations/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
