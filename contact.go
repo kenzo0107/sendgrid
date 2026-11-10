@@ -130,7 +130,7 @@ type OutputGetImportContactsStatus struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/contacts/import-contacts-status
 func (c *Client) GetImportContactsStatus(ctx context.Context, id string) (*OutputGetImportContactsStatus, error) {
-	path := fmt.Sprintf("/marketing/contacts/imports/%s", id)
+	path := fmt.Sprintf("/marketing/contacts/imports/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -151,7 +151,7 @@ type OutputGetContact struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/contacts/get-a-contact-by-id
 func (c *Client) GetContact(ctx context.Context, id string) (*OutputGetContact, error) {
-	path := fmt.Sprintf("/marketing/contacts/%s", id)
+	path := fmt.Sprintf("/marketing/contacts/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -339,7 +339,7 @@ type OutputGetExportContactsStatus struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/contacts/export-contacts-status
 func (c *Client) GetExportContactsStatus(ctx context.Context, id string) (*OutputGetExportContactsStatus, error) {
-	path := fmt.Sprintf("/marketing/contacts/exports/%s", id)
+	path := fmt.Sprintf("/marketing/contacts/exports/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -443,7 +443,7 @@ type OutputDeleteContactIdentifier struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/contacts/delete-a-contact-identifier
 func (c *Client) DeleteContactIdentifier(ctx context.Context, contactID string, input *InputDeleteContactIdentifier) (*OutputDeleteContactIdentifier, error) {
-	path := fmt.Sprintf("/marketing/contacts/%s/identifiers", contactID)
+	path := fmt.Sprintf("/marketing/contacts/%s/identifiers", url.PathEscape(contactID))
 
 	req, err := c.NewRequest("DELETE", path, input)
 	if err != nil {
@@ -473,7 +473,7 @@ type OutputGetContactsByIdentifiers struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/contacts/get-contacts-by-identifiers
 func (c *Client) GetContactsByIdentifiers(ctx context.Context, identifierType string, input *InputGetContactsByIdentifiers) (*OutputGetContactsByIdentifiers, error) {
-	path := fmt.Sprintf("/marketing/contacts/search/identifiers/%s", identifierType)
+	path := fmt.Sprintf("/marketing/contacts/search/identifiers/%s", url.PathEscape(identifierType))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {

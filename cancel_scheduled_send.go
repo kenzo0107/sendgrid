@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type OutputCreateBatchID struct {
@@ -29,7 +30,7 @@ type OutputValidateBatchID struct {
 }
 
 func (c *Client) ValidateBatchID(ctx context.Context, batchID string) (*OutputValidateBatchID, error) {
-	path := fmt.Sprintf("/mail/batch/%s", batchID)
+	path := fmt.Sprintf("/mail/batch/%s", url.PathEscape(batchID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -51,7 +52,7 @@ type OutputGetScheduledSend struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/cancel-scheduled-sends/retrieve-scheduled-send
 func (c *Client) GetScheduledSend(ctx context.Context, batchID string) (*OutputGetScheduledSend, error) {
-	path := fmt.Sprintf("/user/scheduled_sends/%s", batchID)
+	path := fmt.Sprintf("/user/scheduled_sends/%s", url.PathEscape(batchID))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -92,7 +93,7 @@ type InputUpdateScheduledSend struct {
 
 // see: https://docs.sendgrid.com/api-reference/cancel-scheduled-sends/update-a-scheduled-send
 func (c *Client) UpdateScheduledSend(ctx context.Context, batchID string, input *InputUpdateScheduledSend) error {
-	path := fmt.Sprintf("/user/scheduled_sends/%s", batchID)
+	path := fmt.Sprintf("/user/scheduled_sends/%s", url.PathEscape(batchID))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -113,7 +114,7 @@ type OutputCancelOrPauseScheduledSend struct {
 
 // see: https://docs.sendgrid.com/api-reference/cancel-scheduled-sends/delete-a-cancellation-or-pause-of-a-scheduled-send
 func (c *Client) CancelOrPauseScheduledSend(ctx context.Context, batchID string) (*OutputCancelOrPauseScheduledSend, error) {
-	path := fmt.Sprintf("/user/scheduled_sends/%s", batchID)
+	path := fmt.Sprintf("/user/scheduled_sends/%s", url.PathEscape(batchID))
 
 	req, err := c.NewRequest("POST", path, nil)
 	if err != nil {
@@ -130,7 +131,7 @@ func (c *Client) CancelOrPauseScheduledSend(ctx context.Context, batchID string)
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/cancel-scheduled-sends/cancel-or-pause-a-scheduled-send
 func (c *Client) DeleteScheduledSend(ctx context.Context, batchID string) error {
-	path := fmt.Sprintf("/user/scheduled_sends/%s", batchID)
+	path := fmt.Sprintf("/user/scheduled_sends/%s", url.PathEscape(batchID))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

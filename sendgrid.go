@@ -256,3 +256,14 @@ func (c *Client) AddOptions(s string, opts interface{}) (string, error) {
 
 	return u.String(), nil
 }
+
+// The separator is left as a raw "," instead of escaping the joined string,
+// because SendGrid does not document whether it decodes "%2C" before splitting
+// the values.
+func escapeQueryList(values []string) string {
+	escaped := make([]string, len(values))
+	for i, v := range values {
+		escaped[i] = url.QueryEscape(v)
+	}
+	return strings.Join(escaped, ",")
+}
