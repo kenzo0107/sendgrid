@@ -119,7 +119,7 @@ func (c *Client) ResendVerifiedSenderRequest(ctx context.Context, id int64) erro
 }
 
 func (c *Client) VerifySenderRequest(ctx context.Context, token string) error {
-	path := fmt.Sprintf("/verified_senders/verify/%s", token)
+	path := fmt.Sprintf("/verified_senders/verify/%s", url.PathEscape(token))
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
 		return err

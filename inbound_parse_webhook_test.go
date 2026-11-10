@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -361,4 +362,122 @@ func TestDeleteInboundParseWebhook_NewRequestError(t *testing.T) {
 	}
 
 	client.baseURL = originalBaseURL
+}
+
+func TestCreateInboundParseWebhook_SecurityPolicy(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/webhooks/parse/settings", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, "POST")
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := `{"url":"https://example.com","hostname":"foo.bar","spam_check":false,"send_raw":false,"security_policy":"policy-1"}`; strings.TrimSpace(string(body)) != want {
+			t.Errorf("request body = %s, want %s", body, want)
+		}
+		if _, err := fmt.Fprint(w, `{
+			"url": "https://example.com",
+			"hostname": "foo.bar",
+			"spam_check": false,
+			"send_raw": false,
+			"security_policy": "policy-1"
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateInboundParseWebhook(context.TODO(), &InputCreateInboundParseWebhook{
+		URL:            "https://example.com",
+		Hostname:       "foo.bar",
+		SecurityPolicy: "policy-1",
+	})
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	want := &OutputCreateInboundParseWebhook{
+		URL:            "https://example.com",
+		Hostname:       "foo.bar",
+		SecurityPolicy: "policy-1",
+	}
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetInboundParseWebhook_SecurityPolicy(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/webhooks/parse/settings/foo.bar", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{"hostname": "foo.bar", "url": "https://example.com", "security_policy": "policy-1"}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetInboundParseWebhook(context.TODO(), "foo.bar")
+	if err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+	if expected.SecurityPolicy != "policy-1" {
+		t.Errorf("SecurityPolicy = %q, want %q", expected.SecurityPolicy, "policy-1")
+	}
+}
+
+func TestUpdateInboundParseWebhook_SecurityPolicy(t *testing.T) {
+	tests := []struct {
+		name           string
+		securityPolicy *string
+		wantBody       string
+	}{
+		{
+			name:           "nil leaves the policy unchanged",
+			securityPolicy: nil,
+			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false}`,
+		},
+		{
+			name:           "attaches the policy",
+			securityPolicy: String("policy-1"),
+			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false,"security_policy":"policy-1"}`,
+		},
+		{
+			name:           "empty string detaches the policy with null",
+			securityPolicy: String(""),
+			wantBody:       `{"url":"https://example.com","spam_check":false,"send_raw":false,"security_policy":null}`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux, _, teardown := setup()
+			defer teardown()
+
+			mux.HandleFunc("/user/webhooks/parse/settings/foo.bar", func(w http.ResponseWriter, r *http.Request) {
+				testMethod(t, r, "PATCH")
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if got := strings.TrimSpace(string(body)); got != tt.wantBody {
+					t.Errorf("request body = %s, want %s", got, tt.wantBody)
+				}
+				if _, err := fmt.Fprint(w, `{"url": "https://example.com", "hostname": "foo.bar", "security_policy": "policy-1"}`); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			expected, err := client.UpdateInboundParseWebhook(context.TODO(), "foo.bar", &InputUpdateInboundParseWebhook{
+				URL:            "https://example.com",
+				SecurityPolicy: tt.securityPolicy,
+			})
+			if err != nil {
+				t.Fatalf("Unexpected error: %s", err)
+			}
+			if expected.SecurityPolicy != "policy-1" {
+				t.Errorf("SecurityPolicy = %q, want %q", expected.SecurityPolicy, "policy-1")
+			}
+		})
+	}
 }

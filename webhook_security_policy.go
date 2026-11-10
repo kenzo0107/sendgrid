@@ -3,6 +3,7 @@ package sendgrid
 import (
 	"context"
 	"fmt"
+	"net/url"
 )
 
 type WebhookSecurityPolicyOAuth struct {
@@ -13,7 +14,8 @@ type WebhookSecurityPolicyOAuth struct {
 }
 
 type WebhookSecurityPolicySignature struct {
-	Enabled   bool   `json:"enabled,omitempty"`
+	// Not omitempty: the API removes the signature only when it receives enabled: false.
+	Enabled   bool   `json:"enabled"`
 	PublicKey string `json:"public_key,omitempty"`
 }
 
@@ -74,7 +76,7 @@ type OutputGetWebhookSecurityPolicy struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/webhook-security-policies/retrieve-a-specific-webhook-security-policy
 func (c *Client) GetWebhookSecurityPolicy(ctx context.Context, id string) (*OutputGetWebhookSecurityPolicy, error) {
-	path := fmt.Sprintf("/user/webhooks/security/policies/%s", id)
+	path := fmt.Sprintf("/user/webhooks/security/policies/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -101,7 +103,7 @@ type OutputUpdateWebhookSecurityPolicy struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/webhook-security-policies/update-an-existing-webhook-security-policy
 func (c *Client) UpdateWebhookSecurityPolicy(ctx context.Context, id string, input *InputUpdateWebhookSecurityPolicy) (*OutputUpdateWebhookSecurityPolicy, error) {
-	path := fmt.Sprintf("/user/webhooks/security/policies/%s", id)
+	path := fmt.Sprintf("/user/webhooks/security/policies/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -118,7 +120,7 @@ func (c *Client) UpdateWebhookSecurityPolicy(ctx context.Context, id string, inp
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/webhook-security-policies/delete-a-specific-webhook-security-policy
 func (c *Client) DeleteWebhookSecurityPolicy(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/user/webhooks/security/policies/%s", id)
+	path := fmt.Sprintf("/user/webhooks/security/policies/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {

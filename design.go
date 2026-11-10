@@ -81,7 +81,7 @@ type OutputGetDesign struct {
 
 // see: https://docs.sendgrid.com/api-reference/designs-api/get-design
 func (c *Client) GetDesign(ctx context.Context, id string) (*OutputGetDesign, error) {
-	path := fmt.Sprintf("/designs/%s", id)
+	path := fmt.Sprintf("/designs/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -160,7 +160,7 @@ type OutputUpdateDesign struct {
 
 // see: https://docs.sendgrid.com/api-reference/designs-api/update-design
 func (c *Client) UpdateDesign(ctx context.Context, id string, input *InputUpdateDesign) (*OutputUpdateDesign, error) {
-	path := fmt.Sprintf("/designs/%s", id)
+	path := fmt.Sprintf("/designs/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -196,7 +196,7 @@ type OutputDuplicateDesign struct {
 
 // see: https://docs.sendgrid.com/api-reference/designs-api/duplicate-design
 func (c *Client) DuplicateDesign(ctx context.Context, id string, input *InputDuplicateDesign) (*OutputDuplicateDesign, error) {
-	path := fmt.Sprintf("/designs/%s", id)
+	path := fmt.Sprintf("/designs/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {
@@ -253,7 +253,7 @@ func (c *Client) GetPreBuiltDesigns(ctx context.Context, input *InputGetPreBuilt
 
 // see: https://docs.sendgrid.com/api-reference/designs-api/delete-design
 func (c *Client) DeleteDesign(ctx context.Context, id string) error {
-	path := fmt.Sprintf("/designs/%s", id)
+	path := fmt.Sprintf("/designs/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
@@ -282,7 +282,7 @@ type OutputGetPreBuiltDesign struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/designs-api/get-sendgrid-pre-built-design
 func (c *Client) GetPreBuiltDesign(ctx context.Context, id string) (*OutputGetPreBuiltDesign, error) {
-	path := fmt.Sprintf("/designs/pre-builts/%s", id)
+	path := fmt.Sprintf("/designs/pre-builts/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -318,7 +318,7 @@ type OutputDuplicatePreBuiltDesign struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/designs-api/duplicate-sendgrid-pre-built-design
 func (c *Client) DuplicatePreBuiltDesign(ctx context.Context, id string, input *InputDuplicatePreBuiltDesign) (*OutputDuplicatePreBuiltDesign, error) {
-	path := fmt.Sprintf("/designs/pre-builts/%s", id)
+	path := fmt.Sprintf("/designs/pre-builts/%s", url.PathEscape(id))
 
 	req, err := c.NewRequest("POST", path, input)
 	if err != nil {

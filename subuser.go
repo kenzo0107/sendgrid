@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Subuser struct {
@@ -17,7 +18,7 @@ type Subuser struct {
 
 // document link not found
 func (c *Client) GetSubuser(ctx context.Context, username string) (*Subuser, error) {
-	path := fmt.Sprintf("/subusers/%s", username)
+	path := fmt.Sprintf("/subusers/%s", url.PathEscape(username))
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ type Reputation struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/retrieve-subuser-reputations
 func (c *Client) GetSubuserReputations(ctx context.Context, usernames string) ([]*Reputation, error) {
-	path := fmt.Sprintf("/subusers/reputations?usernames=%s", usernames)
+	path := fmt.Sprintf("/subusers/reputations?usernames=%s", escapeQueryList(strings.Split(usernames, ",")))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -138,7 +139,7 @@ type InputUpdateSubuserStatus struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/enabledisable-a-subuser
 func (c *Client) UpdateSubuserStatus(ctx context.Context, username string, input *InputUpdateSubuserStatus) error {
-	path := fmt.Sprintf("/subusers/%s", username)
+	path := fmt.Sprintf("/subusers/%s", url.PathEscape(username))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
@@ -153,7 +154,7 @@ func (c *Client) UpdateSubuserStatus(ctx context.Context, username string, input
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/update-ips-assigned-to-a-subuser
 func (c *Client) UpdateSubuserIps(ctx context.Context, username string, ips []string) error {
-	path := fmt.Sprintf("/subusers/%s/ips", username)
+	path := fmt.Sprintf("/subusers/%s/ips", url.PathEscape(username))
 
 	req, err := c.NewRequest("PUT", path, ips)
 	if err != nil {
@@ -168,7 +169,7 @@ func (c *Client) UpdateSubuserIps(ctx context.Context, username string, ips []st
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/delete-a-subuser
 func (c *Client) DeleteSubuser(ctx context.Context, username string) error {
-	path := fmt.Sprintf("/subusers/%s", username)
+	path := fmt.Sprintf("/subusers/%s", url.PathEscape(username))
 
 	req, err := c.NewRequest("DELETE", path, nil)
 	if err != nil {
@@ -191,7 +192,7 @@ type OutputGetCreditsForSubuser struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/get-credits-for-subuser
 func (c *Client) GetCreditsForSubuser(ctx context.Context, username string) (*OutputGetCreditsForSubuser, error) {
-	path := fmt.Sprintf("/subusers/%s/credits", username)
+	path := fmt.Sprintf("/subusers/%s/credits", url.PathEscape(username))
 
 	req, err := c.NewRequest("GET", path, nil)
 	if err != nil {
@@ -221,7 +222,7 @@ type OutputUpdateCreditsForSubuser struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/update-credits-for-subuser
 func (c *Client) UpdateCreditsForSubuser(ctx context.Context, username string, input *InputUpdateCreditsForSubuser) (*OutputUpdateCreditsForSubuser, error) {
-	path := fmt.Sprintf("/subusers/%s/credits", username)
+	path := fmt.Sprintf("/subusers/%s/credits", url.PathEscape(username))
 
 	req, err := c.NewRequest("PUT", path, input)
 	if err != nil {
@@ -249,7 +250,7 @@ type OutputUpdateRemainingCreditsForSubuser struct {
 
 // see: https://www.twilio.com/docs/sendgrid/api-reference/subusers-api/update-remaining-credits-for-subuser
 func (c *Client) UpdateRemainingCreditsForSubuser(ctx context.Context, username string, input *InputUpdateRemainingCreditsForSubuser) (*OutputUpdateRemainingCreditsForSubuser, error) {
-	path := fmt.Sprintf("/subusers/%s/credits/remaining", username)
+	path := fmt.Sprintf("/subusers/%s/credits/remaining", url.PathEscape(username))
 
 	req, err := c.NewRequest("PATCH", path, input)
 	if err != nil {
