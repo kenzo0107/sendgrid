@@ -366,3 +366,68 @@ func TestUpdateWebhookSecurityPolicy_DisableSignature(t *testing.T) {
 		t.Errorf("Unexpected error: %s", err)
 	}
 }
+
+func TestDeleteWebhookSecurityPolicyWithOptions(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     *InputDeleteWebhookSecurityPolicy
+		wantQuery string
+	}{
+		{name: "nil input sends no query", input: nil, wantQuery: ""},
+		{name: "force false sends no query", input: &InputDeleteWebhookSecurityPolicy{Force: false}, wantQuery: ""},
+		{name: "force true", input: &InputDeleteWebhookSecurityPolicy{Force: true}, wantQuery: "force=true"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux, _, teardown := setup()
+			defer teardown()
+
+			mux.HandleFunc("/user/webhooks/security/policies/policy-1", func(w http.ResponseWriter, r *http.Request) {
+				testMethod(t, r, "DELETE")
+				if r.URL.RawQuery != tt.wantQuery {
+					t.Errorf("query = %q, want %q", r.URL.RawQuery, tt.wantQuery)
+				}
+				if _, err := fmt.Fprint(w, `{"policy": null}`); err != nil {
+					t.Fatal(err)
+				}
+			})
+
+			if err := client.DeleteWebhookSecurityPolicyWithOptions(context.TODO(), "policy-1", tt.input); err != nil {
+				t.Errorf("Unexpected error: %s", err)
+			}
+		})
+	}
+}
+
+func TestDeleteWebhookSecurityPolicyWithOptions_Failed(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/user/webhooks/security/policies/policy-1", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusConflict)
+	})
+
+	if err := client.DeleteWebhookSecurityPolicyWithOptions(context.TODO(), "policy-1", nil); err == nil {
+		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestDeleteWebhookSecurityPolicyWithOptions_NewRequestError(t *testing.T) {
+	client, _, _, teardown := setup()
+	defer teardown()
+
+	originalBaseURL := client.baseURL
+	invalidURL, _ := url.Parse("https://api.example.com/v3/")
+	client.baseURL = invalidURL
+
+	err := client.DeleteWebhookSecurityPolicyWithOptions(context.TODO(), "policy-1", &InputDeleteWebhookSecurityPolicy{Force: true})
+	if err == nil {
+		t.Error("Expected error for invalid baseURL")
+	}
+	if err != nil && !strings.Contains(err.Error(), "trailing slash") {
+		t.Errorf("Expected error message to contain 'trailing slash', got %v", err.Error())
+	}
+
+	client.baseURL = originalBaseURL
+}
