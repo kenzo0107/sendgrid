@@ -140,13 +140,15 @@ func (c *Client) GetGoogleAnalyticsSettings(ctx context.Context) (*OutputGetGoog
 	return r, nil
 }
 
+// String fields are pointers so that String("") can clear a value; a nil
+// field is not sent.
 type InputUpdateGoogleAnalyticsSettings struct {
-	Enabled     bool   `json:"enabled"`
-	UTMCampaign string `json:"utm_campaign,omitempty"`
-	UTMContent  string `json:"utm_content,omitempty"`
-	UTMMedium   string `json:"utm_medium,omitempty"`
-	UTMSource   string `json:"utm_source,omitempty"`
-	UTMTerm     string `json:"utm_term,omitempty"`
+	Enabled     bool    `json:"enabled"`
+	UTMCampaign *string `json:"utm_campaign,omitempty"`
+	UTMContent  *string `json:"utm_content,omitempty"`
+	UTMMedium   *string `json:"utm_medium,omitempty"`
+	UTMSource   *string `json:"utm_source,omitempty"`
+	UTMTerm     *string `json:"utm_term,omitempty"`
 }
 
 type OutputUpdateGoogleAnalyticsSettings struct {
@@ -197,13 +199,15 @@ func (c *Client) GetSubscriptionTrackingSettings(ctx context.Context) (*OutputGe
 	return r, nil
 }
 
+// String fields are pointers so that String("") can clear a value; a nil
+// field is not sent.
 type InputUpdateSubscriptionTrackingSettings struct {
-	Enabled      bool   `json:"enabled"`
-	HTMLContent  string `json:"html_content,omitempty"`
-	Landing      string `json:"landing,omitempty"`
-	PlainContent string `json:"plain_content,omitempty"`
-	Replace      string `json:"replace,omitempty"`
-	URL          string `json:"url,omitempty"`
+	Enabled      bool    `json:"enabled"`
+	HTMLContent  *string `json:"html_content,omitempty"`
+	Landing      *string `json:"landing,omitempty"`
+	PlainContent *string `json:"plain_content,omitempty"`
+	Replace      *string `json:"replace,omitempty"`
+	URL          *string `json:"url,omitempty"`
 }
 
 type OutputUpdateSubscriptionTrackingSettings struct {
