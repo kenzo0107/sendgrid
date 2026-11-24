@@ -141,7 +141,7 @@ func (c *Client) GetGoogleAnalyticsSettings(ctx context.Context) (*OutputGetGoog
 }
 
 // String fields are pointers so that String("") can clear a value; a nil
-// field is left unchanged.
+// field is not sent.
 type InputUpdateGoogleAnalyticsSettings struct {
 	Enabled     bool    `json:"enabled"`
 	UTMCampaign *string `json:"utm_campaign,omitempty"`
@@ -200,7 +200,7 @@ func (c *Client) GetSubscriptionTrackingSettings(ctx context.Context) (*OutputGe
 }
 
 // String fields are pointers so that String("") can clear a value; a nil
-// field is left unchanged.
+// field is not sent.
 type InputUpdateSubscriptionTrackingSettings struct {
 	Enabled      bool    `json:"enabled"`
 	HTMLContent  *string `json:"html_content,omitempty"`
