@@ -2,6 +2,7 @@ package sendgrid
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -342,11 +343,9 @@ func TestUpdateGoogleAnalyticsSettings(t *testing.T) {
 
 	expected, err := client.UpdateGoogleAnalyticsSettings(context.TODO(), &InputUpdateGoogleAnalyticsSettings{
 		Enabled:     true,
-		UTMSource:   "sendgrid.com",
-		UTMMedium:   "email",
-		UTMTerm:     "",
-		UTMContent:  "",
-		UTMCampaign: "sendgrid-email",
+		UTMSource:   String("sendgrid.com"),
+		UTMMedium:   String("email"),
+		UTMCampaign: String("sendgrid-email"),
 	})
 	if err != nil {
 		t.Errorf("Unexpected error: %s", err)
@@ -376,11 +375,9 @@ func TestUpdateGoogleAnalyticsSettings_Failed(t *testing.T) {
 
 	_, err := client.UpdateGoogleAnalyticsSettings(context.TODO(), &InputUpdateGoogleAnalyticsSettings{
 		Enabled:     true,
-		UTMSource:   "sendgrid.com",
-		UTMMedium:   "email",
-		UTMTerm:     "",
-		UTMContent:  "",
-		UTMCampaign: "sendgrid-email",
+		UTMSource:   String("sendgrid.com"),
+		UTMMedium:   String("email"),
+		UTMCampaign: String("sendgrid-email"),
 	})
 	if err == nil {
 		t.Fatal("expected an error but got none")
@@ -570,5 +567,69 @@ func TestUpdateSubscriptionTrackingSettings_NewRequestError(t *testing.T) {
 	_, err := client.UpdateSubscriptionTrackingSettings(context.TODO(), &InputUpdateSubscriptionTrackingSettings{Enabled: true})
 	if err == nil {
 		t.Fatal("expected an error but got none")
+	}
+}
+
+func TestUpdateGoogleAnalyticsSettings_SendsEmptyStringAndOmitsNil(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	var got map[string]any
+	mux.HandleFunc("/tracking_settings/google_analytics", func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := fmt.Fprint(w, `{"enabled":true}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if _, err := client.UpdateGoogleAnalyticsSettings(context.TODO(), &InputUpdateGoogleAnalyticsSettings{
+		Enabled:     true,
+		UTMSource:   String("sendgrid.com"),
+		UTMCampaign: String(""),
+	}); err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	want := map[string]any{
+		"enabled":      true,
+		"utm_source":   "sendgrid.com",
+		"utm_campaign": "",
+	}
+	if !reflect.DeepEqual(want, got) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, got)))
+	}
+}
+
+func TestUpdateSubscriptionTrackingSettings_SendsEmptyStringAndOmitsNil(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	var got map[string]any
+	mux.HandleFunc("/tracking_settings/subscription", func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&got); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := fmt.Fprint(w, `{"enabled":true}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if _, err := client.UpdateSubscriptionTrackingSettings(context.TODO(), &InputUpdateSubscriptionTrackingSettings{
+		Enabled:     true,
+		HTMLContent: String("<p><% Unsubscribe %></p>"),
+		URL:         String(""),
+	}); err != nil {
+		t.Fatalf("Unexpected error: %s", err)
+	}
+
+	want := map[string]any{
+		"enabled":      true,
+		"html_content": "<p><% Unsubscribe %></p>",
+		"url":          "",
+	}
+	if !reflect.DeepEqual(want, got) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, got)))
 	}
 }
