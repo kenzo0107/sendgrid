@@ -2,6 +2,7 @@ package sendgrid
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -75,6 +76,100 @@ func TestGetBrandedLink(t *testing.T) {
 				Type:  "cname",
 				Host:  "9876543.examle.com",
 				Data:  "sendgrid.net",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestGetBrandedLink_AutoSSL(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/links/1234567", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"user_id": 9876543,
+			"domain": "examle.com",
+			"subdomain": "abc",
+			"username": "dummy",
+			"valid": false,
+			"default": false,
+			"legacy": false,
+			"dns": {
+				"domain_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "abc.examle.com",
+					"data": "click.sendgrid.net"
+				},
+				"owner_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "9876543.examle.com",
+					"data": "sendgrid.net"
+				},
+				"acme_challenge_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "_acme-challenge.abc.examle.com",
+					"data": "abc.examle.com.0123456789abcdef.dcv.cloudflare.com"
+				},
+				"cf_custom_hostname_txt": {
+					"valid": false,
+					"type": "txt",
+					"host": "_cf-custom-hostname.abc.examle.com",
+					"data": "00000000-0000-0000-0000-000000000000"
+				}
+			},
+			"last_validation_attempt_at": 1794228307,
+			"region": "global",
+			"auto_ssl": true,
+			"auto_ssl_available": false
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.GetBrandedLink(context.TODO(), 1234567)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputGetBrandedLink{
+		ID:                      1234567,
+		UserID:                  9876543,
+		Domain:                  "examle.com",
+		Subdomain:               "abc",
+		Username:                "dummy",
+		Region:                  "global",
+		AutoSSL:                 true,
+		AutoSSLAvailable:        false,
+		LastValidationAttemptAt: 1794228307,
+		DNS: DNSBrandedLink{
+			DomainCname: Record{
+				Type: "cname",
+				Host: "abc.examle.com",
+				Data: "click.sendgrid.net",
+			},
+			OwnerCname: Record{
+				Type: "cname",
+				Host: "9876543.examle.com",
+				Data: "sendgrid.net",
+			},
+			AcmeChallengeCname: Record{
+				Type: "cname",
+				Host: "_acme-challenge.abc.examle.com",
+				Data: "abc.examle.com.0123456789abcdef.dcv.cloudflare.com",
+			},
+			CfCustomHostnameTxt: Record{
+				Type: "txt",
+				Host: "_cf-custom-hostname.abc.examle.com",
+				Data: "00000000-0000-0000-0000-000000000000",
 			},
 		},
 	}
@@ -336,6 +431,142 @@ func TestCreateBrandedLink(t *testing.T) {
 	}
 }
 
+func TestCreateBrandedLink_AutoSSL(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/links", func(w http.ResponseWriter, r *http.Request) {
+		var reqBody map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+		if reqBody["auto_ssl"] != true {
+			t.Errorf("Expected auto_ssl to be true, got %v", reqBody["auto_ssl"])
+		}
+		if reqBody["region"] != "global" {
+			t.Errorf("Expected region to be global, got %v", reqBody["region"])
+		}
+
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"user_id": 9876543,
+			"domain": "examle.com",
+			"subdomain": "abc",
+			"username": "dummy",
+			"valid": false,
+			"default": false,
+			"legacy": false,
+			"dns": {
+				"domain_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "abc.examle.com",
+					"data": "click.sendgrid.net"
+				},
+				"owner_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "9876543.examle.com",
+					"data": "sendgrid.net"
+				},
+				"acme_challenge_cname": {
+					"valid": false,
+					"type": "cname",
+					"host": "_acme-challenge.abc.examle.com",
+					"data": "abc.examle.com.0123456789abcdef.dcv.cloudflare.com"
+				},
+				"cf_custom_hostname_txt": {
+					"valid": false,
+					"type": "txt",
+					"host": "_cf-custom-hostname.abc.examle.com",
+					"data": "00000000-0000-0000-0000-000000000000"
+				}
+			},
+			"region": "global",
+			"auto_ssl": true,
+			"auto_ssl_available": false
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.CreateBrandedLink(context.TODO(), &InputCreateBrandedLink{
+		Domain:    "examle.com",
+		Subdomain: "abc",
+		Region:    "global",
+		AutoSSL:   true,
+	})
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputCreateBrandedLink{
+		ID:               1234567,
+		UserID:           9876543,
+		Domain:           "examle.com",
+		Subdomain:        "abc",
+		Username:         "dummy",
+		Region:           "global",
+		AutoSSL:          true,
+		AutoSSLAvailable: false,
+		DNS: DNSBrandedLink{
+			DomainCname: Record{
+				Type: "cname",
+				Host: "abc.examle.com",
+				Data: "click.sendgrid.net",
+			},
+			OwnerCname: Record{
+				Type: "cname",
+				Host: "9876543.examle.com",
+				Data: "sendgrid.net",
+			},
+			AcmeChallengeCname: Record{
+				Type: "cname",
+				Host: "_acme-challenge.abc.examle.com",
+				Data: "abc.examle.com.0123456789abcdef.dcv.cloudflare.com",
+			},
+			CfCustomHostnameTxt: Record{
+				Type: "txt",
+				Host: "_cf-custom-hostname.abc.examle.com",
+				Data: "00000000-0000-0000-0000-000000000000",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestCreateBrandedLink_OmitsAutoSSLAndRegionWhenUnset(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/links", func(w http.ResponseWriter, r *http.Request) {
+		var reqBody map[string]interface{}
+		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+			t.Fatalf("Failed to decode request body: %v", err)
+		}
+		for _, key := range []string{"auto_ssl", "region"} {
+			if _, ok := reqBody[key]; ok {
+				t.Errorf("Expected %s to be omitted from the request body, got %v", key, reqBody[key])
+			}
+		}
+
+		if _, err := fmt.Fprint(w, testJsonBrandedLink); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	if _, err := client.CreateBrandedLink(context.TODO(), &InputCreateBrandedLink{
+		Domain:    "examle.com",
+		Subdomain: "abc",
+	}); err != nil {
+		t.Errorf("Unexpected error: %s", err)
+	}
+}
+
 func TestCreateBrandedLink_Failed(t *testing.T) {
 	client, mux, _, teardown := setup()
 	defer teardown()
@@ -395,6 +626,108 @@ func TestValidateBrandedLink(t *testing.T) {
 				Valid:  false,
 				Reason: "Expected CNAME record for \"9876543.examle.com\" to match \"sendgrid.net\", but got \"9876543.examle.com.\".",
 			},
+		},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestValidateBrandedLink_AutoSSL(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/links/1234567/validate", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"valid": false,
+			"validation_results": {
+				"domain_cname": {
+					"valid": false,
+					"reason": "Expected CNAME record for \"abc.examle.com\" to match \"click.sendgrid.net\", but got \"\"."
+				},
+				"owner_cname": {
+					"valid": false,
+					"reason": "Expected CNAME record for \"9876543.examle.com\" to match \"sendgrid.net\", but got \"\"."
+				},
+				"acme_challenge_cname": {
+					"valid": false,
+					"reason": "Expected CNAME record for \"_acme-challenge.abc.examle.com\" to match \"abc.examle.com.0123456789abcdef.dcv.cloudflare.com\", but got \"\"."
+				},
+				"cf_custom_hostname_txt": {
+					"valid": false,
+					"reason": "Unable to lookup TXT record for \"_cf-custom-hostname.abc.examle.com\"."
+				}
+			}
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.ValidateBrandedLink(context.TODO(), 1234567)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputValidateBrandedLink{
+		ID:    1234567,
+		Valid: false,
+		ValidationResults: ValidationResultsBrandedLink{
+			DomainCname: ValidationResult{
+				Reason: "Expected CNAME record for \"abc.examle.com\" to match \"click.sendgrid.net\", but got \"\".",
+			},
+			OwnerCname: ValidationResult{
+				Reason: "Expected CNAME record for \"9876543.examle.com\" to match \"sendgrid.net\", but got \"\".",
+			},
+			AcmeChallengeCname: ValidationResult{
+				Reason: "Expected CNAME record for \"_acme-challenge.abc.examle.com\" to match \"abc.examle.com.0123456789abcdef.dcv.cloudflare.com\", but got \"\".",
+			},
+			CfCustomHostnameTxt: ValidationResult{
+				Reason: "Unable to lookup TXT record for \"_cf-custom-hostname.abc.examle.com\".",
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(want, expected) {
+		t.Fatal(ErrIncorrectResponse, errors.New(pretty.Compare(want, expected)))
+	}
+}
+
+func TestValidateBrandedLink_AutoSSLValid(t *testing.T) {
+	client, mux, _, teardown := setup()
+	defer teardown()
+
+	mux.HandleFunc("/whitelabel/links/1234567/validate", func(w http.ResponseWriter, r *http.Request) {
+		if _, err := fmt.Fprint(w, `{
+			"id": 1234567,
+			"valid": true,
+			"validation_results": {
+				"domain_cname": {"valid": true, "reason": null},
+				"owner_cname": {"valid": true, "reason": null},
+				"acme_challenge_cname": {"valid": true, "reason": null},
+				"cf_custom_hostname_txt": {"valid": true, "reason": null}
+			}
+		}`); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	expected, err := client.ValidateBrandedLink(context.TODO(), 1234567)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err)
+		return
+	}
+
+	want := &OutputValidateBrandedLink{
+		ID:    1234567,
+		Valid: true,
+		ValidationResults: ValidationResultsBrandedLink{
+			DomainCname:         ValidationResult{Valid: true},
+			OwnerCname:          ValidationResult{Valid: true},
+			AcmeChallengeCname:  ValidationResult{Valid: true},
+			CfCustomHostnameTxt: ValidationResult{Valid: true},
 		},
 	}
 
